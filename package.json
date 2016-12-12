@@ -1,6 +1,6 @@
 {
   "name": "dungeon-factory",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A procedural dungeon generator",
   "main": "lib/generator.js",
   "homepage": "https://github.com/LucianBuzzo/dungeon-factory",
