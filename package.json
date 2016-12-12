@@ -6,7 +6,7 @@
   "homepage": "https://github.com/LucianBuzzo/dungeon-factory",
   "repository": {
     "type": "git",
-    "url": "git://github.com/LucianBuzzo/dungeon-factory.git
+    "url": "git://github.com/LucianBuzzo/dungeon-factory.git"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
