@@ -1,0 +1,14 @@
+{
+  "name": "dungeon-factory",
+  "version": "1.0.0",
+  "description": "A procedural dungeon generator",
+  "main": "lib/generator.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "underscore": "^1.8.3"
+  }
+}
