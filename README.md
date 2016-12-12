@@ -15,7 +15,7 @@ $ npm install --save dungeon-factory
 
 ## Usage
 
-Create a new instance of the generator and then call the `generate` method,
+Require in the factory and then call the `generate` method,
 using an object containing a `width` and `height` attribute. 
 The `width` and `height` attributes determine the size of the dungeon and should
 always be odd numbers.
@@ -46,8 +46,11 @@ Tile {
 }
 ```
 
- - **Type** - The tile type, can be one of 'wall', 'floor' or 'door'.
- - **Neighbours** - An array containing the tiles immediately surrounding this one.
+ - **type** - The tile type, can be one of 'wall', 'floor' or 'door'.
+ - **neighbours** - An array containing the tiles immediately surrounding this one.
  - **nesw** - An object containing the tiles immediately north, south, east, and
 west of this tile.
 
+## License
+
+The project is licensed under the MIT license.

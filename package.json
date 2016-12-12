@@ -3,11 +3,25 @@
   "version": "1.0.0",
   "description": "A procedural dungeon generator",
   "main": "lib/generator.js",
+  "homepage": "https://github.com/LucianBuzzo/dungeon-factory",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/LucianBuzzo/dungeon-factory.git
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "procedural",
+    "map",
+    "generator",
+    "dungeon",
+    "games",
+    "level",
+    "roguelike"
+  ],
+  "author": "Lucian Buzzo <lucian.buzzo@gmail.com>",
+  "license": "MIT",
   "dependencies": {
     "underscore": "^1.8.3"
   }
