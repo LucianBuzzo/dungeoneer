@@ -1,6 +1,6 @@
-const Generator = require('./lib/generator.js');
+const DungeonFactory = require('./lib/generator.js');
 
-let dungeon = new Generator().generate({
+let dungeon = DungeonFactory.generate({
   width: 21,
   height: 21
 });
