@@ -9,7 +9,8 @@
     "url": "git://github.com/LucianBuzzo/dungeon-factory.git"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "web": "browserify lib/generator.js -o web/bundle.js --standalone DungeonFactory -t babelify --presets es2015"
   },
   "keywords": [
     "procedural",
@@ -24,5 +25,8 @@
   "license": "MIT",
   "dependencies": {
     "underscore": "^1.8.3"
+  },
+  "devDependencies": {
+    "babelify": "^7.3.0"
   }
 }
