@@ -1,6 +1,6 @@
 {
   "name": "dungeon-factory",
-  "version": "1.0.3a",
+  "version": "1.0.4",
   "description": "A procedural dungeon generator",
   "main": "lib/generator.js",
   "homepage": "https://github.com/LucianBuzzo/dungeon-factory",
@@ -9,7 +9,7 @@
     "url": "git://github.com/LucianBuzzo/dungeon-factory.git"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node test.js",
     "web": "browserify lib/generator.js -o web/bundle.js --standalone DungeonFactory -t babelify --presets es2015"
   },
   "keywords": [
