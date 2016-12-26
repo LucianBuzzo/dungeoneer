@@ -24,7 +24,8 @@
   "author": "Lucian Buzzo <lucian.buzzo@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "underscore": "^1.8.3"
+    "underscore": "^1.8.3",
+    "victor": "^1.1.0"
   },
   "devDependencies": {
     "babelify": "^7.3.0"
