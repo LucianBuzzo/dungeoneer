@@ -5,6 +5,8 @@ It is largely based on the excellent work of [Bob
 Nystrom](https://github.com/munificent) and his game
 [Hauberk](http://munificent.github.io/hauberk/), which you can read about [here](http://journal.stuffwithstuff.com/2014/12/21/rooms-and-mazes/).
 
+A demo of this module can be seen here https://lucianbuzzo.github.io/dungeon-factory/
+
 ## Installation
 
 Install `dungeon-factory` by running:
