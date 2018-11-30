@@ -80,3 +80,9 @@ typings/
 .fusebox/
 
 # End of https://www.gitignore.io/api/node
+
+
+# Parcel build files
+.cache
+dist
+
