@@ -1,0 +1,11 @@
+language: node_js
+node_js:
+- '8'
+deploy:
+  provider: npm
+  email: lucian.buzzo@gmail.com
+  api_key:
+    secure: OfkgoMs9mr/OqGiuA2/gkX/6Kre1ciuaHDctM/fslAGUX8uoPHJSI8ZQA6i47eon/gkzYL/4mmICzKP/EyezUizuKPskfwn7rO3WXF6wcBb0ndS/c1MNAPeyttgc0HVuSi8Qs6lySma60lbaJcTlNfr69tI1qI3YCE1u2MGZVJQ7TIu9nlMq66FRem/DoDqHszWSP1vlz1eEWAMcYZPTOjHKDLWg9olo2vv6a2iqfur95B8SOOBxfqymoi7szPrYm2QiWl9S1TgJ6XgwUPqvaSbFOeYFgX0bWe9I89GEWnhmhDwqR7wlkPB8GrgAeEe6R293B3sWD4kMMop4kkLEtJTsIeti4MRDiygCxofpAMrPdo82HHnjjrsw5BZ35HF5fHNW/E9iYvengjVk3hijYUL32tVTTh2unNVy6SHXMudEh4d0c4eI/cjs/IExNMGYYQ0l31OgX3PXkeCCD9tauEartw5IZBy7A2wF04u0Ta6KpDnUpUbDmSVWDiPmDTbdzS7jTXjutnfldddhjAa8YLj/NAmYj1oMa4Hkb1RLtJMYAaTYGJUTsRahm/9jCdkpipvYdNwroulUmBbL54a4U7tal28X8X51aN3fOmAFY20EVxSU3a8haqd9wXX7BDEAoOdBaQa1N9mtGTF8AC9q+ofZYipdUDSNQ6FNhRsayH8=
+  on:
+    tags: true
+    repo: LucianBuzzo/dungeoneer
