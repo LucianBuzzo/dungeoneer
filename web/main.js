@@ -1,4 +1,5 @@
 const dungeoneer = require('../lib/generator')
+const packageJSON = require('../package')
 
 var canvas = document.querySelector('canvas');
 var ctx = canvas.getContext('2d');
@@ -48,3 +49,14 @@ document.querySelector('button').addEventListener('click', function () {
 }, false)
 
 create(51, 51)
+
+const $version = document.createElement('div')
+$version.innerText = `v${packageJSON.version}`
+$version.style = `
+  color: white;
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  font-family: monospace;
+`
+document.body.appendChild($version)
