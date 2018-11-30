@@ -1,6 +1,6 @@
 {
   "name": "dungeoneer",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "A procedural dungeon generator",
   "main": "lib/generator.js",
   "homepage": "https://github.com/LucianBuzzo/dungeoneer",
