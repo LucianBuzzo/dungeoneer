@@ -1,18 +1,18 @@
-# dungeon-factory
+# Dungeoneer
 
 This module is a tool for generating random dungeons as a two dimensional array.
 It is largely based on the excellent work of [Bob
 Nystrom](https://github.com/munificent) and his game
 [Hauberk](http://munificent.github.io/hauberk/), which you can read about [here](http://journal.stuffwithstuff.com/2014/12/21/rooms-and-mazes/).
 
-A demo of this module can be seen here https://lucianbuzzo.github.io/dungeon-factory/
+A demo of this module can be seen here https://lucianbuzzo.github.io/dungeoneer/
 
 ## Installation
 
-Install `dungeon-factory` by running:
+Install `dungeoneer` by running:
 
 ```sh
-$ npm install --save dungeon-factory
+$ npm install --save dungeoneer
 ```
 
 ## Usage
@@ -23,9 +23,9 @@ The `width` and `height` attributes determine the size of the dungeon and should
 always be odd numbers.
 
 ```
-const DungeonFactory = require('dungeon-factory');
+const Dungeoneer = require('dungeoneer');
 
-const dungeon = DungeonFactory.generate({
+const dungeon = Dungeoneer.generate({
   width: 21,
   height: 21
 });

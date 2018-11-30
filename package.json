@@ -1,16 +1,16 @@
 {
-  "name": "dungeon-factory",
+  "name": "dungeoneer",
   "version": "1.0.6",
   "description": "A procedural dungeon generator",
   "main": "lib/generator.js",
-  "homepage": "https://github.com/LucianBuzzo/dungeon-factory",
+  "homepage": "https://github.com/LucianBuzzo/dungeoneer",
   "repository": {
     "type": "git",
-    "url": "git://github.com/LucianBuzzo/dungeon-factory.git"
+    "url": "git://github.com/LucianBuzzo/dungeoneer.git"
   },
   "scripts": {
     "test": "node test.js",
-    "web": "browserify lib/generator.js -o web/bundle.js --standalone DungeonFactory -t babelify --presets es2015"
+    "web": "browserify lib/generator.js -o web/bundle.js --standalone Dungeoneer -t babelify --presets es2015"
   },
   "keywords": [
     "procedural",
