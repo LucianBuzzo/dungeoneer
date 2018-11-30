@@ -1,12 +1,13 @@
-/* global Dungeoneer */
-var canvas = document.querySelector('canvas')
-var ctx = canvas.getContext('2d')
+const dungeoneer = require('../lib/generator')
+
+var canvas = document.querySelector('canvas');
+var ctx = canvas.getContext('2d');
 
 ctx.imageSmoothingEnabled = false
 
-var create = function (width, height) {
-  var cellSize = 4
-  var dungeon = Dungeoneer.generate({
+var create = function(width, height) {
+  var cellSize = 4;
+  var dungeon = dungeoneer.generate({
     width: width,
     height: height
   })

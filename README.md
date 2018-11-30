@@ -41,9 +41,9 @@ The `width` and `height` attributes determine the size of the dungeon and should
 always be odd numbers.
 
 ```
-const Dungeoneer = require('dungeoneer');
+const dungeoneer = require('dungeoneer');
 
-const dungeon = Dungeoneer.generate({
+const dungeon = dungeoneer.generate({
   width: 21,
   height: 21
 });

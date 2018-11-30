@@ -9,9 +9,10 @@
     "url": "git://github.com/LucianBuzzo/dungeoneer.git"
   },
   "scripts": {
-    "test": "npm run lint && node test.js",
+    "test": "node test.js",
     "lint": "standard",
-    "web": "browserify lib/generator.js -o web/bundle.js --standalone Dungeoneer -t babelify --presets es2015"
+    "dev": "parcel ./web/index.html",
+    "build": "parcel build ./web/index.html"
   },
   "keywords": [
     "procedural",
@@ -29,7 +30,7 @@
     "victor": "^1.1.0"
   },
   "devDependencies": {
-    "babelify": "^7.3.0",
+    "parcel-bundler": "^1.10.3",
     "standard": "^12.0.1"
   }
 }
