@@ -5,7 +5,7 @@ ctx.imageSmoothingEnabled = false;
 
 var create = function(width, height) {
   var cellSize = 4;
-  var dungeon = DungeonFactory.generate({
+  var dungeon = Dungeoneer.generate({
     width: width,
     height: height
   });

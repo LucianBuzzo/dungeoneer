@@ -1,12 +1,16 @@
-(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.DungeonFactory = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.Dungeoneer = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 /**
  * Based on Bob Nystrom's procedural dungeon generation logic that he wrote for Hauberk
  * http://journal.stuffwithstuff.com/2014/12/21/rooms-and-mazes/
  */
 
-var _ = require('underscore');
-var Room = require('./room');
-var Tile = require('./tile');
+'use strict';
+
+const Victor = require('victor');
+const _ = require('underscore');
+
+const Room = require('./room');
+const Tile = require('./tile');
 
 /**
  * @desc The random dungeon generator.
@@ -47,7 +51,7 @@ const Dungeon = function Dungeon() {
   // Increasing this allows rooms to be larger.
   var roomExtraSize = 0;
 
-  var windingPercent = 0;
+  var windingPercent = 50;
 
   var _rooms = [];
 
@@ -55,6 +59,14 @@ const Dungeon = function Dungeon() {
   var _currentRegion = -1;
 
   var stage;
+
+  const n = new Victor(0, 1);
+  const e = new Victor(1, 0);
+  const s = new Victor(0, -1);
+  const w = new Victor(-1, 0);
+
+  // The four cardinal directions: north, south, east, and west.
+  const cardinalDirections = [n, e, s, w];
 
   const bindStage = givenStage => {
     stage = givenStage;
@@ -75,7 +87,8 @@ const Dungeon = function Dungeon() {
   };
 
   /**
-   * @desc Sets a tile's type and region
+   * @desc Sets a tile's type and region. This function will thrown an error if
+   * the tile doesn't exist.
    *
    * @param {Number} x - The x coordinate of the tile to set
    * @param {Number} y - The y coordinate of the tile to set
@@ -92,7 +105,7 @@ const Dungeon = function Dungeon() {
       return _tiles[x][y];
     }
 
-    return null;
+    throw new RangeError(`tile at ${x}, ${y} is unreachable`);
   };
 
   /**
@@ -160,10 +173,11 @@ const Dungeon = function Dungeon() {
    *
    * @param {Object} stage - An object with a width key and a height key. Used
    * to determine the size of the dungeon. Must be odd with and height.
+   * @param {Boolean} debug - outputs debug info if set to true
    *
    * @returns {Object} - Tile information for the dungeon
    */
-  const generate = stage => {
+  const generate = (stage, debug = false) => {
     let startDate = Date.now();
     if (stage.width % 2 === 0 || stage.height % 2 === 0) {
       throw new Error('The stage must be odd-sized.');
@@ -176,8 +190,8 @@ const Dungeon = function Dungeon() {
     _addRooms();
 
     // Fill in all of the empty space with mazes.
-    for (var y = 0; y < stage.height; y++) {
-      for (var x = 0; x < stage.width; x++) {
+    for (var y = 1; y < stage.height; y += 2) {
+      for (var x = 1; x < stage.width; x += 2) {
         // Skip the maze generation if the tile is already carved
         if (getTile(x, y).type === 'floor') {
           continue;
@@ -192,7 +206,9 @@ const Dungeon = function Dungeon() {
 
     let endDate = Date.now();
 
-    console.log('Dungeon generated in ' + (endDate - startDate) + 'ms');
+    if (debug) {
+      console.log('Dungeon generated in ' + (endDate - startDate) + 'ms');
+    }
 
     return {
       rooms: _rooms,
@@ -219,47 +235,46 @@ const Dungeon = function Dungeon() {
 
     _startRegion();
 
-    cells.push({ x: startX, y: startY });
+    _carve(startX, startY);
+
+    cells.push(new Victor(startX, startY));
+
     let count = 0;
+
     while (cells.length && count < 500) {
       count++;
       var cell = cells[cells.length - 1];
-      var x = cell.x;
-      var y = cell.y;
 
       // See which adjacent cells are open.
       var unmadeCells = [];
 
-      if (_canCarve(x, y - 1) && _canCarve(x, y - 2) && _canCarve(x - 1, y - 1) && _canCarve(x - 1, y - 2) && _canCarve(x + 1, y - 1) && _canCarve(x + 1, y - 2)) {
-        unmadeCells.push(x + ':' + (y - 1));
-      }
-      if (_canCarve(x + 1, y) && _canCarve(x + 2, y) && _canCarve(x + 1, y - 1) && _canCarve(x + 2, y - 2) && _canCarve(x + 1, y + 1) && _canCarve(x + 2, y + 2)) {
-        unmadeCells.push(x + 1 + ':' + y);
-      }
-      if (_canCarve(x, y + 1) && _canCarve(x, y + 2) && _canCarve(x - 1, y + 1) && _canCarve(x - 2, y + 2) && _canCarve(x + 1, y + 1) && _canCarve(x + 2, y + 2)) {
-        unmadeCells.push(x + ':' + (y + 1));
-      }
-      if (_canCarve(x - 1, y) && _canCarve(x - 2, y) && _canCarve(x - 1, y - 1) && _canCarve(x - 2, y - 2) && _canCarve(x - 1, y - 1) && _canCarve(x - 2, y - 2)) {
-        unmadeCells.push(x - 1 + ':' + y);
+      for (let dir of cardinalDirections) {
+        if (_canCarve(cell, dir)) {
+          unmadeCells.push(dir);
+        }
       }
 
       if (unmadeCells.length) {
         // Based on how "windy" passages are, try to prefer carving in the
         // same direction.
         var dir;
-        if (unmadeCells.indexOf(lastDir) > -1 && _.random(1, 100) > windingPercent) {
-          dir = lastDir;
+        var stringifiedCells = unmadeCells.map(v => v.toString());
+        if (lastDir && stringifiedCells.indexOf(lastDir.toString()) > -1 && _.random(1, 100) > windingPercent) {
+          dir = lastDir.clone();
         } else {
-          dir = unmadeCells[_.random(0, unmadeCells.length - 1)];
+          let rand = _.random(0, unmadeCells.length - 1);
+          dir = unmadeCells[rand].clone();
         }
 
-        let [dirX, dirY] = dir.split(':').map(Number);
+        let carveLoc1 = cell.clone().add(dir).toObject();
+        _carve(carveLoc1.x, carveLoc1.y);
 
-        _carve(cell.x, cell.y);
-        _carve(dirX, dirY);
+        let carveLoc2 = cell.clone().add(dir).add(dir).toObject();
+        _carve(carveLoc2.x, carveLoc2.y);
 
-        cells.push({ x: dirX, y: dirY });
-        lastDir = dir;
+        cells.push(cell.clone().add(dir).add(dir));
+
+        lastDir = dir.clone();
       } else {
         // No adjacent uncarved cells.
         cells.pop();
@@ -296,6 +311,14 @@ const Dungeon = function Dungeon() {
 
       var x = _.random(0, Math.floor((stage.width - width) / 2)) * 2 + 1;
       var y = _.random(0, Math.floor((stage.height - height) / 2)) * 2 + 1;
+
+      if (x > stage.width - width) {
+        x = stage.width - width - 1;
+      }
+
+      if (y > stage.height - height) {
+        y = stage.height - height - 1;
+      }
 
       var room = new Room(x, y, width, height);
 
@@ -427,21 +450,31 @@ const Dungeon = function Dungeon() {
   };
 
   /**
-   * @desc Checks if a tile at given coordinates can be carved
+   * @desc Gets whether or not an opening can be carved from the given starting
+   * [Cell] at [pos] to the adjacent Cell facing [direction]. Returns `true`
+   * if the starting Cell is in bounds and the destination Cell is filled
+   * (or out of bounds).</returns>
    *
-   * @param {Number} x - The x coordinate to check
-   * @param {Number} y - The y coordinate to check
+   * @param {Victor} cell - Victor JS vector object
+   * @param {Victor} direction - Victor JS vector object indicating direction
    *
-   * @returns {Boolean} - true if the tile can be carved
+   * @return {Boolean} - true if the path can be carved
    */
-  const _canCarve = (x, y) => {
+  const _canCarve = (cell, direction) => {
     // Must end in bounds.
-    if (!_tiles[x] || !_tiles[x][y]) {
+    let end = cell.clone().add(direction).add(direction).add(direction).toObject();
+
+    if (!_tiles[end.x] || !_tiles[end.x][end.y]) {
+      return false;
+    }
+
+    if (getTile(end.x, end.y).type !== 'wall') {
       return false;
     }
 
     // Destination must not be open.
-    return getTile(x, y).type !== 'floor';
+    let dest = cell.clone().add(direction).add(direction).toObject();
+    return getTile(dest.x, dest.y).type !== 'floor';
   };
 
   /**
@@ -482,7 +515,9 @@ module.exports = {
   generate
 };
 
-},{"./room":2,"./tile":3,"underscore":4}],2:[function(require,module,exports){
+},{"./room":2,"./tile":3,"underscore":4,"victor":5}],2:[function(require,module,exports){
+'use strict';
+
 /**
  * @desc Helper class for drawing rooms when generating dungeons
  * @constructor
@@ -492,6 +527,7 @@ module.exports = {
  * @param {Number} width - The width of the room
  * @param {Number} height - The height of the room
  */
+
 const Room = function Room(x, y, width, height) {
   this.x = x;
   this.y = y;
@@ -536,12 +572,15 @@ Room.prototype.intersects = function intersects(other) {
 module.exports = Room;
 
 },{}],3:[function(require,module,exports){
+'use strict';
+
 /**
  * @desc Class for a single tilein a dungeon
  * @constructor
  *
  * @param {String} type - The type of tile, e.g. 'wall', 'floor'
  */
+
 const Tile = function Tile(type) {
   this.type = type;
   this.neighbours = [];
@@ -562,9 +601,10 @@ Tile.prototype.setNeighbours = function (neighbours) {
 module.exports = Tile;
 
 },{}],4:[function(require,module,exports){
-//     Underscore.js 1.8.3
+(function (global){
+//     Underscore.js 1.9.1
 //     http://underscorejs.org
-//     (c) 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+//     (c) 2009-2018 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
 //     Underscore may be freely distributed under the MIT license.
 
 (function() {
@@ -572,29 +612,32 @@ module.exports = Tile;
   // Baseline setup
   // --------------
 
-  // Establish the root object, `window` in the browser, or `exports` on the server.
-  var root = this;
+  // Establish the root object, `window` (`self`) in the browser, `global`
+  // on the server, or `this` in some virtual machines. We use `self`
+  // instead of `window` for `WebWorker` support.
+  var root = typeof self == 'object' && self.self === self && self ||
+            typeof global == 'object' && global.global === global && global ||
+            this ||
+            {};
 
   // Save the previous value of the `_` variable.
   var previousUnderscore = root._;
 
   // Save bytes in the minified (but not gzipped) version:
-  var ArrayProto = Array.prototype, ObjProto = Object.prototype, FuncProto = Function.prototype;
+  var ArrayProto = Array.prototype, ObjProto = Object.prototype;
+  var SymbolProto = typeof Symbol !== 'undefined' ? Symbol.prototype : null;
 
   // Create quick reference variables for speed access to core prototypes.
-  var
-    push             = ArrayProto.push,
-    slice            = ArrayProto.slice,
-    toString         = ObjProto.toString,
-    hasOwnProperty   = ObjProto.hasOwnProperty;
+  var push = ArrayProto.push,
+      slice = ArrayProto.slice,
+      toString = ObjProto.toString,
+      hasOwnProperty = ObjProto.hasOwnProperty;
 
   // All **ECMAScript 5** native function implementations that we hope to use
   // are declared here.
-  var
-    nativeIsArray      = Array.isArray,
-    nativeKeys         = Object.keys,
-    nativeBind         = FuncProto.bind,
-    nativeCreate       = Object.create;
+  var nativeIsArray = Array.isArray,
+      nativeKeys = Object.keys,
+      nativeCreate = Object.create;
 
   // Naked function reference for surrogate-prototype-swapping.
   var Ctor = function(){};
@@ -607,10 +650,12 @@ module.exports = Tile;
   };
 
   // Export the Underscore object for **Node.js**, with
-  // backwards-compatibility for the old `require()` API. If we're in
+  // backwards-compatibility for their old module API. If we're in
   // the browser, add `_` as a global object.
-  if (typeof exports !== 'undefined') {
-    if (typeof module !== 'undefined' && module.exports) {
+  // (`nodeType` is checked to ensure that `module`
+  // and `exports` are not HTML elements.)
+  if (typeof exports != 'undefined' && !exports.nodeType) {
+    if (typeof module != 'undefined' && !module.nodeType && module.exports) {
       exports = module.exports = _;
     }
     exports._ = _;
@@ -619,7 +664,7 @@ module.exports = Tile;
   }
 
   // Current version.
-  _.VERSION = '1.8.3';
+  _.VERSION = '1.9.1';
 
   // Internal function that returns an efficient (for current engines) version
   // of the passed-in callback, to be repeatedly applied in other Underscore
@@ -630,9 +675,7 @@ module.exports = Tile;
       case 1: return function(value) {
         return func.call(context, value);
       };
-      case 2: return function(value, other) {
-        return func.call(context, value, other);
-      };
+      // The 2-argument case is omitted because we’re not using it.
       case 3: return function(value, index, collection) {
         return func.call(context, value, index, collection);
       };
@@ -645,34 +688,51 @@ module.exports = Tile;
     };
   };
 
-  // A mostly-internal function to generate callbacks that can be applied
-  // to each element in a collection, returning the desired result — either
-  // identity, an arbitrary callback, a property matcher, or a property accessor.
+  var builtinIteratee;
+
+  // An internal function to generate callbacks that can be applied to each
+  // element in a collection, returning the desired result — either `identity`,
+  // an arbitrary callback, a property matcher, or a property accessor.
   var cb = function(value, context, argCount) {
+    if (_.iteratee !== builtinIteratee) return _.iteratee(value, context);
     if (value == null) return _.identity;
     if (_.isFunction(value)) return optimizeCb(value, context, argCount);
-    if (_.isObject(value)) return _.matcher(value);
+    if (_.isObject(value) && !_.isArray(value)) return _.matcher(value);
     return _.property(value);
   };
-  _.iteratee = function(value, context) {
+
+  // External wrapper for our callback generator. Users may customize
+  // `_.iteratee` if they want additional predicate/iteratee shorthand styles.
+  // This abstraction hides the internal-only argCount argument.
+  _.iteratee = builtinIteratee = function(value, context) {
     return cb(value, context, Infinity);
   };
 
-  // An internal function for creating assigner functions.
-  var createAssigner = function(keysFunc, undefinedOnly) {
-    return function(obj) {
-      var length = arguments.length;
-      if (length < 2 || obj == null) return obj;
-      for (var index = 1; index < length; index++) {
-        var source = arguments[index],
-            keys = keysFunc(source),
-            l = keys.length;
-        for (var i = 0; i < l; i++) {
-          var key = keys[i];
-          if (!undefinedOnly || obj[key] === void 0) obj[key] = source[key];
-        }
+  // Some functions take a variable number of arguments, or a few expected
+  // arguments at the beginning and then a variable number of values to operate
+  // on. This helper accumulates all remaining arguments past the function’s
+  // argument length (or an explicit `startIndex`), into an array that becomes
+  // the last argument. Similar to ES6’s "rest parameter".
+  var restArguments = function(func, startIndex) {
+    startIndex = startIndex == null ? func.length - 1 : +startIndex;
+    return function() {
+      var length = Math.max(arguments.length - startIndex, 0),
+          rest = Array(length),
+          index = 0;
+      for (; index < length; index++) {
+        rest[index] = arguments[index + startIndex];
       }
-      return obj;
+      switch (startIndex) {
+        case 0: return func.call(this, rest);
+        case 1: return func.call(this, arguments[0], rest);
+        case 2: return func.call(this, arguments[0], arguments[1], rest);
+      }
+      var args = Array(startIndex + 1);
+      for (index = 0; index < startIndex; index++) {
+        args[index] = arguments[index];
+      }
+      args[startIndex] = rest;
+      return func.apply(this, args);
     };
   };
 
@@ -686,18 +746,31 @@ module.exports = Tile;
     return result;
   };
 
-  var property = function(key) {
+  var shallowProperty = function(key) {
     return function(obj) {
       return obj == null ? void 0 : obj[key];
     };
   };
 
+  var has = function(obj, path) {
+    return obj != null && hasOwnProperty.call(obj, path);
+  }
+
+  var deepGet = function(obj, path) {
+    var length = path.length;
+    for (var i = 0; i < length; i++) {
+      if (obj == null) return void 0;
+      obj = obj[path[i]];
+    }
+    return length ? obj : void 0;
+  };
+
   // Helper for collection methods to determine whether a collection
-  // should be iterated as an array or as an object
+  // should be iterated as an array or as an object.
   // Related: http://people.mozilla.org/~jorendorff/es6-draft.html#sec-tolength
   // Avoids a very nasty iOS 8 JIT bug on ARM-64. #2094
   var MAX_ARRAY_INDEX = Math.pow(2, 53) - 1;
-  var getLength = property('length');
+  var getLength = shallowProperty('length');
   var isArrayLike = function(collection) {
     var length = getLength(collection);
     return typeof length == 'number' && length >= 0 && length <= MAX_ARRAY_INDEX;
@@ -739,30 +812,29 @@ module.exports = Tile;
   };
 
   // Create a reducing function iterating left or right.
-  function createReduce(dir) {
-    // Optimized iterator function as using arguments.length
-    // in the main function will deoptimize the, see #1991.
-    function iterator(obj, iteratee, memo, keys, index, length) {
+  var createReduce = function(dir) {
+    // Wrap code that reassigns argument variables in a separate function than
+    // the one that accesses `arguments.length` to avoid a perf hit. (#1991)
+    var reducer = function(obj, iteratee, memo, initial) {
+      var keys = !isArrayLike(obj) && _.keys(obj),
+          length = (keys || obj).length,
+          index = dir > 0 ? 0 : length - 1;
+      if (!initial) {
+        memo = obj[keys ? keys[index] : index];
+        index += dir;
+      }
       for (; index >= 0 && index < length; index += dir) {
         var currentKey = keys ? keys[index] : index;
         memo = iteratee(memo, obj[currentKey], currentKey, obj);
       }
       return memo;
-    }
+    };
 
     return function(obj, iteratee, memo, context) {
-      iteratee = optimizeCb(iteratee, context, 4);
-      var keys = !isArrayLike(obj) && _.keys(obj),
-          length = (keys || obj).length,
-          index = dir > 0 ? 0 : length - 1;
-      // Determine the initial value if none is provided.
-      if (arguments.length < 3) {
-        memo = obj[keys ? keys[index] : index];
-        index += dir;
-      }
-      return iterator(obj, iteratee, memo, keys, index, length);
+      var initial = arguments.length >= 3;
+      return reducer(obj, optimizeCb(iteratee, context, 4), memo, initial);
     };
-  }
+  };
 
   // **Reduce** builds up a single result from a list of values, aka `inject`,
   // or `foldl`.
@@ -773,12 +845,8 @@ module.exports = Tile;
 
   // Return the first value which passes a truth test. Aliased as `detect`.
   _.find = _.detect = function(obj, predicate, context) {
-    var key;
-    if (isArrayLike(obj)) {
-      key = _.findIndex(obj, predicate, context);
-    } else {
-      key = _.findKey(obj, predicate, context);
-    }
+    var keyFinder = isArrayLike(obj) ? _.findIndex : _.findKey;
+    var key = keyFinder(obj, predicate, context);
     if (key !== void 0 && key !== -1) return obj[key];
   };
 
@@ -833,14 +901,26 @@ module.exports = Tile;
   };
 
   // Invoke a method (with arguments) on every item in a collection.
-  _.invoke = function(obj, method) {
-    var args = slice.call(arguments, 2);
-    var isFunc = _.isFunction(method);
-    return _.map(obj, function(value) {
-      var func = isFunc ? method : value[method];
-      return func == null ? func : func.apply(value, args);
+  _.invoke = restArguments(function(obj, path, args) {
+    var contextPath, func;
+    if (_.isFunction(path)) {
+      func = path;
+    } else if (_.isArray(path)) {
+      contextPath = path.slice(0, -1);
+      path = path[path.length - 1];
+    }
+    return _.map(obj, function(context) {
+      var method = func;
+      if (!method) {
+        if (contextPath && contextPath.length) {
+          context = deepGet(context, contextPath);
+        }
+        if (context == null) return void 0;
+        method = context[path];
+      }
+      return method == null ? method : method.apply(context, args);
     });
-  };
+  });
 
   // Convenience version of a common use case of `map`: fetching a property.
   _.pluck = function(obj, key) {
@@ -863,20 +943,20 @@ module.exports = Tile;
   _.max = function(obj, iteratee, context) {
     var result = -Infinity, lastComputed = -Infinity,
         value, computed;
-    if (iteratee == null && obj != null) {
+    if (iteratee == null || typeof iteratee == 'number' && typeof obj[0] != 'object' && obj != null) {
       obj = isArrayLike(obj) ? obj : _.values(obj);
       for (var i = 0, length = obj.length; i < length; i++) {
         value = obj[i];
-        if (value > result) {
+        if (value != null && value > result) {
           result = value;
         }
       }
     } else {
       iteratee = cb(iteratee, context);
-      _.each(obj, function(value, index, list) {
-        computed = iteratee(value, index, list);
+      _.each(obj, function(v, index, list) {
+        computed = iteratee(v, index, list);
         if (computed > lastComputed || computed === -Infinity && result === -Infinity) {
-          result = value;
+          result = v;
           lastComputed = computed;
         }
       });
@@ -888,20 +968,20 @@ module.exports = Tile;
   _.min = function(obj, iteratee, context) {
     var result = Infinity, lastComputed = Infinity,
         value, computed;
-    if (iteratee == null && obj != null) {
+    if (iteratee == null || typeof iteratee == 'number' && typeof obj[0] != 'object' && obj != null) {
       obj = isArrayLike(obj) ? obj : _.values(obj);
       for (var i = 0, length = obj.length; i < length; i++) {
         value = obj[i];
-        if (value < result) {
+        if (value != null && value < result) {
           result = value;
         }
       }
     } else {
       iteratee = cb(iteratee, context);
-      _.each(obj, function(value, index, list) {
-        computed = iteratee(value, index, list);
+      _.each(obj, function(v, index, list) {
+        computed = iteratee(v, index, list);
         if (computed < lastComputed || computed === Infinity && result === Infinity) {
-          result = value;
+          result = v;
           lastComputed = computed;
         }
       });
@@ -909,21 +989,13 @@ module.exports = Tile;
     return result;
   };
 
-  // Shuffle a collection, using the modern version of the
-  // [Fisher-Yates shuffle](http://en.wikipedia.org/wiki/Fisher–Yates_shuffle).
+  // Shuffle a collection.
   _.shuffle = function(obj) {
-    var set = isArrayLike(obj) ? obj : _.values(obj);
-    var length = set.length;
-    var shuffled = Array(length);
-    for (var index = 0, rand; index < length; index++) {
-      rand = _.random(0, index);
-      if (rand !== index) shuffled[index] = shuffled[rand];
-      shuffled[rand] = set[index];
-    }
-    return shuffled;
+    return _.sample(obj, Infinity);
   };
 
-  // Sample **n** random values from a collection.
+  // Sample **n** random values from a collection using the modern version of the
+  // [Fisher-Yates shuffle](http://en.wikipedia.org/wiki/Fisher–Yates_shuffle).
   // If **n** is not specified, returns a single random element.
   // The internal `guard` argument allows it to work with `map`.
   _.sample = function(obj, n, guard) {
@@ -931,17 +1003,28 @@ module.exports = Tile;
       if (!isArrayLike(obj)) obj = _.values(obj);
       return obj[_.random(obj.length - 1)];
     }
-    return _.shuffle(obj).slice(0, Math.max(0, n));
+    var sample = isArrayLike(obj) ? _.clone(obj) : _.values(obj);
+    var length = getLength(sample);
+    n = Math.max(Math.min(n, length), 0);
+    var last = length - 1;
+    for (var index = 0; index < n; index++) {
+      var rand = _.random(index, last);
+      var temp = sample[index];
+      sample[index] = sample[rand];
+      sample[rand] = temp;
+    }
+    return sample.slice(0, n);
   };
 
   // Sort the object's values by a criterion produced by an iteratee.
   _.sortBy = function(obj, iteratee, context) {
+    var index = 0;
     iteratee = cb(iteratee, context);
-    return _.pluck(_.map(obj, function(value, index, list) {
+    return _.pluck(_.map(obj, function(value, key, list) {
       return {
         value: value,
-        index: index,
-        criteria: iteratee(value, index, list)
+        index: index++,
+        criteria: iteratee(value, key, list)
       };
     }).sort(function(left, right) {
       var a = left.criteria;
@@ -955,9 +1038,9 @@ module.exports = Tile;
   };
 
   // An internal function used for aggregate "group by" operations.
-  var group = function(behavior) {
+  var group = function(behavior, partition) {
     return function(obj, iteratee, context) {
-      var result = {};
+      var result = partition ? [[], []] : {};
       iteratee = cb(iteratee, context);
       _.each(obj, function(value, index) {
         var key = iteratee(value, index, obj);
@@ -970,7 +1053,7 @@ module.exports = Tile;
   // Groups the object's values by a criterion. Pass either a string attribute
   // to group by, or a function that returns the criterion.
   _.groupBy = group(function(result, value, key) {
-    if (_.has(result, key)) result[key].push(value); else result[key] = [value];
+    if (has(result, key)) result[key].push(value); else result[key] = [value];
   });
 
   // Indexes the object's values by a criterion, similar to `groupBy`, but for
@@ -983,13 +1066,18 @@ module.exports = Tile;
   // either a string attribute to count by, or a function that returns the
   // criterion.
   _.countBy = group(function(result, value, key) {
-    if (_.has(result, key)) result[key]++; else result[key] = 1;
+    if (has(result, key)) result[key]++; else result[key] = 1;
   });
 
+  var reStrSymbol = /[^\ud800-\udfff]|[\ud800-\udbff][\udc00-\udfff]|[\ud800-\udfff]/g;
   // Safely create a real, live array from anything iterable.
   _.toArray = function(obj) {
     if (!obj) return [];
     if (_.isArray(obj)) return slice.call(obj);
+    if (_.isString(obj)) {
+      // Keep surrogate pair characters together
+      return obj.match(reStrSymbol);
+    }
     if (isArrayLike(obj)) return _.map(obj, _.identity);
     return _.values(obj);
   };
@@ -1002,14 +1090,9 @@ module.exports = Tile;
 
   // Split a collection into two arrays: one whose elements all satisfy the given
   // predicate, and one whose elements all do not satisfy the predicate.
-  _.partition = function(obj, predicate, context) {
-    predicate = cb(predicate, context);
-    var pass = [], fail = [];
-    _.each(obj, function(value, key, obj) {
-      (predicate(value, key, obj) ? pass : fail).push(value);
-    });
-    return [pass, fail];
-  };
+  _.partition = group(function(result, value, pass) {
+    result[pass ? 0 : 1].push(value);
+  }, true);
 
   // Array Functions
   // ---------------
@@ -1018,7 +1101,7 @@ module.exports = Tile;
   // values in the array. Aliased as `head` and `take`. The **guard** check
   // allows it to work with `_.map`.
   _.first = _.head = _.take = function(array, n, guard) {
-    if (array == null) return void 0;
+    if (array == null || array.length < 1) return n == null ? void 0 : [];
     if (n == null || guard) return array[0];
     return _.initial(array, array.length - n);
   };
@@ -1033,7 +1116,7 @@ module.exports = Tile;
   // Get the last element of an array. Passing **n** will return the last N
   // values in the array.
   _.last = function(array, n, guard) {
-    if (array == null) return void 0;
+    if (array == null || array.length < 1) return n == null ? void 0 : [];
     if (n == null || guard) return array[array.length - 1];
     return _.rest(array, Math.max(0, array.length - n));
   };
@@ -1047,21 +1130,23 @@ module.exports = Tile;
 
   // Trim out all falsy values from an array.
   _.compact = function(array) {
-    return _.filter(array, _.identity);
+    return _.filter(array, Boolean);
   };
 
   // Internal implementation of a recursive `flatten` function.
-  var flatten = function(input, shallow, strict, startIndex) {
-    var output = [], idx = 0;
-    for (var i = startIndex || 0, length = getLength(input); i < length; i++) {
+  var flatten = function(input, shallow, strict, output) {
+    output = output || [];
+    var idx = output.length;
+    for (var i = 0, length = getLength(input); i < length; i++) {
       var value = input[i];
       if (isArrayLike(value) && (_.isArray(value) || _.isArguments(value))) {
-        //flatten current level of array or arguments object
-        if (!shallow) value = flatten(value, shallow, strict);
-        var j = 0, len = value.length;
-        output.length += len;
-        while (j < len) {
-          output[idx++] = value[j++];
+        // Flatten current level of array or arguments object.
+        if (shallow) {
+          var j = 0, len = value.length;
+          while (j < len) output[idx++] = value[j++];
+        } else {
+          flatten(value, shallow, strict, output);
+          idx = output.length;
         }
       } else if (!strict) {
         output[idx++] = value;
@@ -1076,12 +1161,15 @@ module.exports = Tile;
   };
 
   // Return a version of the array that does not contain the specified value(s).
-  _.without = function(array) {
-    return _.difference(array, slice.call(arguments, 1));
-  };
+  _.without = restArguments(function(array, otherArrays) {
+    return _.difference(array, otherArrays);
+  });
 
   // Produce a duplicate-free version of the array. If the array has already
   // been sorted, you have the option of using a faster algorithm.
+  // The faster algorithm will not work with an iteratee if the iteratee
+  // is not a one-to-one function, so providing an iteratee will disable
+  // the faster algorithm.
   // Aliased as `unique`.
   _.uniq = _.unique = function(array, isSorted, iteratee, context) {
     if (!_.isBoolean(isSorted)) {
@@ -1095,7 +1183,7 @@ module.exports = Tile;
     for (var i = 0, length = getLength(array); i < length; i++) {
       var value = array[i],
           computed = iteratee ? iteratee(value, i, array) : value;
-      if (isSorted) {
+      if (isSorted && !iteratee) {
         if (!i || seen !== computed) result.push(value);
         seen = computed;
       } else if (iteratee) {
@@ -1112,9 +1200,9 @@ module.exports = Tile;
 
   // Produce an array that contains the union: each distinct element from all of
   // the passed-in arrays.
-  _.union = function() {
-    return _.uniq(flatten(arguments, true, true));
-  };
+  _.union = restArguments(function(arrays) {
+    return _.uniq(flatten(arrays, true, true));
+  });
 
   // Produce an array that contains every item shared between all the
   // passed-in arrays.
@@ -1124,7 +1212,8 @@ module.exports = Tile;
     for (var i = 0, length = getLength(array); i < length; i++) {
       var item = array[i];
       if (_.contains(result, item)) continue;
-      for (var j = 1; j < argsLength; j++) {
+      var j;
+      for (j = 1; j < argsLength; j++) {
         if (!_.contains(arguments[j], item)) break;
       }
       if (j === argsLength) result.push(item);
@@ -1134,21 +1223,15 @@ module.exports = Tile;
 
   // Take the difference between one array and a number of other arrays.
   // Only the elements present in just the first array will remain.
-  _.difference = function(array) {
-    var rest = flatten(arguments, true, true, 1);
+  _.difference = restArguments(function(array, rest) {
+    rest = flatten(rest, true, true);
     return _.filter(array, function(value){
       return !_.contains(rest, value);
     });
-  };
-
-  // Zip together multiple lists into a single array -- elements that share
-  // an index go together.
-  _.zip = function() {
-    return _.unzip(arguments);
-  };
+  });
 
   // Complement of _.zip. Unzip accepts an array of arrays and groups
-  // each array's elements on shared indices
+  // each array's elements on shared indices.
   _.unzip = function(array) {
     var length = array && _.max(array, getLength).length || 0;
     var result = Array(length);
@@ -1159,9 +1242,13 @@ module.exports = Tile;
     return result;
   };
 
+  // Zip together multiple lists into a single array -- elements that share
+  // an index go together.
+  _.zip = restArguments(_.unzip);
+
   // Converts lists into objects. Pass either a single array of `[key, value]`
   // pairs, or two parallel arrays of the same length -- one of keys, and one of
-  // the corresponding values.
+  // the corresponding values. Passing by pairs is the reverse of _.pairs.
   _.object = function(list, values) {
     var result = {};
     for (var i = 0, length = getLength(list); i < length; i++) {
@@ -1174,8 +1261,8 @@ module.exports = Tile;
     return result;
   };
 
-  // Generator function to create the findIndex and findLastIndex functions
-  function createPredicateIndexFinder(dir) {
+  // Generator function to create the findIndex and findLastIndex functions.
+  var createPredicateIndexFinder = function(dir) {
     return function(array, predicate, context) {
       predicate = cb(predicate, context);
       var length = getLength(array);
@@ -1185,9 +1272,9 @@ module.exports = Tile;
       }
       return -1;
     };
-  }
+  };
 
-  // Returns the first index on an array-like that passes a predicate test
+  // Returns the first index on an array-like that passes a predicate test.
   _.findIndex = createPredicateIndexFinder(1);
   _.findLastIndex = createPredicateIndexFinder(-1);
 
@@ -1204,15 +1291,15 @@ module.exports = Tile;
     return low;
   };
 
-  // Generator function to create the indexOf and lastIndexOf functions
-  function createIndexFinder(dir, predicateFind, sortedIndex) {
+  // Generator function to create the indexOf and lastIndexOf functions.
+  var createIndexFinder = function(dir, predicateFind, sortedIndex) {
     return function(array, item, idx) {
       var i = 0, length = getLength(array);
       if (typeof idx == 'number') {
         if (dir > 0) {
-            i = idx >= 0 ? idx : Math.max(idx + length, i);
+          i = idx >= 0 ? idx : Math.max(idx + length, i);
         } else {
-            length = idx >= 0 ? Math.min(idx + 1, length) : idx + length + 1;
+          length = idx >= 0 ? Math.min(idx + 1, length) : idx + length + 1;
         }
       } else if (sortedIndex && idx && length) {
         idx = sortedIndex(array, item);
@@ -1227,7 +1314,7 @@ module.exports = Tile;
       }
       return -1;
     };
-  }
+  };
 
   // Return the position of the first occurrence of an item in an array,
   // or -1 if the item is not included in the array.
@@ -1244,7 +1331,9 @@ module.exports = Tile;
       stop = start || 0;
       start = 0;
     }
-    step = step || 1;
+    if (!step) {
+      step = stop < start ? -1 : 1;
+    }
 
     var length = Math.max(Math.ceil((stop - start) / step), 0);
     var range = Array(length);
@@ -1256,11 +1345,23 @@ module.exports = Tile;
     return range;
   };
 
+  // Chunk a single array into multiple arrays, each containing `count` or fewer
+  // items.
+  _.chunk = function(array, count) {
+    if (count == null || count < 1) return [];
+    var result = [];
+    var i = 0, length = array.length;
+    while (i < length) {
+      result.push(slice.call(array, i, i += count));
+    }
+    return result;
+  };
+
   // Function (ahem) Functions
   // ------------------
 
   // Determines whether to execute a function as a constructor
-  // or a normal function with the provided arguments
+  // or a normal function with the provided arguments.
   var executeBound = function(sourceFunc, boundFunc, context, callingContext, args) {
     if (!(callingContext instanceof boundFunc)) return sourceFunc.apply(context, args);
     var self = baseCreate(sourceFunc.prototype);
@@ -1272,52 +1373,53 @@ module.exports = Tile;
   // Create a function bound to a given object (assigning `this`, and arguments,
   // optionally). Delegates to **ECMAScript 5**'s native `Function.bind` if
   // available.
-  _.bind = function(func, context) {
-    if (nativeBind && func.bind === nativeBind) return nativeBind.apply(func, slice.call(arguments, 1));
+  _.bind = restArguments(function(func, context, args) {
     if (!_.isFunction(func)) throw new TypeError('Bind must be called on a function');
-    var args = slice.call(arguments, 2);
-    var bound = function() {
-      return executeBound(func, bound, context, this, args.concat(slice.call(arguments)));
-    };
+    var bound = restArguments(function(callArgs) {
+      return executeBound(func, bound, context, this, args.concat(callArgs));
+    });
     return bound;
-  };
+  });
 
   // Partially apply a function by creating a version that has had some of its
   // arguments pre-filled, without changing its dynamic `this` context. _ acts
-  // as a placeholder, allowing any combination of arguments to be pre-filled.
-  _.partial = function(func) {
-    var boundArgs = slice.call(arguments, 1);
+  // as a placeholder by default, allowing any combination of arguments to be
+  // pre-filled. Set `_.partial.placeholder` for a custom placeholder argument.
+  _.partial = restArguments(function(func, boundArgs) {
+    var placeholder = _.partial.placeholder;
     var bound = function() {
       var position = 0, length = boundArgs.length;
       var args = Array(length);
       for (var i = 0; i < length; i++) {
-        args[i] = boundArgs[i] === _ ? arguments[position++] : boundArgs[i];
+        args[i] = boundArgs[i] === placeholder ? arguments[position++] : boundArgs[i];
       }
       while (position < arguments.length) args.push(arguments[position++]);
       return executeBound(func, bound, this, this, args);
     };
     return bound;
-  };
+  });
+
+  _.partial.placeholder = _;
 
   // Bind a number of an object's methods to that object. Remaining arguments
   // are the method names to be bound. Useful for ensuring that all callbacks
   // defined on an object belong to it.
-  _.bindAll = function(obj) {
-    var i, length = arguments.length, key;
-    if (length <= 1) throw new Error('bindAll must be passed function names');
-    for (i = 1; i < length; i++) {
-      key = arguments[i];
+  _.bindAll = restArguments(function(obj, keys) {
+    keys = flatten(keys, false, false);
+    var index = keys.length;
+    if (index < 1) throw new Error('bindAll must be passed function names');
+    while (index--) {
+      var key = keys[index];
       obj[key] = _.bind(obj[key], obj);
     }
-    return obj;
-  };
+  });
 
   // Memoize an expensive function by storing its results.
   _.memoize = function(func, hasher) {
     var memoize = function(key) {
       var cache = memoize.cache;
       var address = '' + (hasher ? hasher.apply(this, arguments) : key);
-      if (!_.has(cache, address)) cache[address] = func.apply(this, arguments);
+      if (!has(cache, address)) cache[address] = func.apply(this, arguments);
       return cache[address];
     };
     memoize.cache = {};
@@ -1326,12 +1428,11 @@ module.exports = Tile;
 
   // Delays a function for the given number of milliseconds, and then calls
   // it with the arguments supplied.
-  _.delay = function(func, wait) {
-    var args = slice.call(arguments, 2);
-    return setTimeout(function(){
+  _.delay = restArguments(function(func, wait, args) {
+    return setTimeout(function() {
       return func.apply(null, args);
     }, wait);
-  };
+  });
 
   // Defers a function, scheduling it to run after the current call stack has
   // cleared.
@@ -1343,17 +1444,18 @@ module.exports = Tile;
   // but if you'd like to disable the execution on the leading edge, pass
   // `{leading: false}`. To disable execution on the trailing edge, ditto.
   _.throttle = function(func, wait, options) {
-    var context, args, result;
-    var timeout = null;
+    var timeout, context, args, result;
     var previous = 0;
     if (!options) options = {};
+
     var later = function() {
       previous = options.leading === false ? 0 : _.now();
       timeout = null;
       result = func.apply(context, args);
       if (!timeout) context = args = null;
     };
-    return function() {
+
+    var throttled = function() {
       var now = _.now();
       if (!previous && options.leading === false) previous = now;
       var remaining = wait - (now - previous);
@@ -1372,6 +1474,14 @@ module.exports = Tile;
       }
       return result;
     };
+
+    throttled.cancel = function() {
+      clearTimeout(timeout);
+      previous = 0;
+      timeout = context = args = null;
+    };
+
+    return throttled;
   };
 
   // Returns a function, that, as long as it continues to be invoked, will not
@@ -1379,35 +1489,32 @@ module.exports = Tile;
   // N milliseconds. If `immediate` is passed, trigger the function on the
   // leading edge, instead of the trailing.
   _.debounce = function(func, wait, immediate) {
-    var timeout, args, context, timestamp, result;
+    var timeout, result;
 
-    var later = function() {
-      var last = _.now() - timestamp;
-
-      if (last < wait && last >= 0) {
-        timeout = setTimeout(later, wait - last);
-      } else {
-        timeout = null;
-        if (!immediate) {
-          result = func.apply(context, args);
-          if (!timeout) context = args = null;
-        }
-      }
+    var later = function(context, args) {
+      timeout = null;
+      if (args) result = func.apply(context, args);
     };
 
-    return function() {
-      context = this;
-      args = arguments;
-      timestamp = _.now();
-      var callNow = immediate && !timeout;
-      if (!timeout) timeout = setTimeout(later, wait);
-      if (callNow) {
-        result = func.apply(context, args);
-        context = args = null;
+    var debounced = restArguments(function(args) {
+      if (timeout) clearTimeout(timeout);
+      if (immediate) {
+        var callNow = !timeout;
+        timeout = setTimeout(later, wait);
+        if (callNow) result = func.apply(this, args);
+      } else {
+        timeout = _.delay(later, wait, this, args);
       }
 
       return result;
+    });
+
+    debounced.cancel = function() {
+      clearTimeout(timeout);
+      timeout = null;
     };
+
+    return debounced;
   };
 
   // Returns the first function passed as an argument to the second,
@@ -1462,22 +1569,24 @@ module.exports = Tile;
   // often you call it. Useful for lazy initialization.
   _.once = _.partial(_.before, 2);
 
+  _.restArguments = restArguments;
+
   // Object Functions
   // ----------------
 
   // Keys in IE < 9 that won't be iterated by `for key in ...` and thus missed.
   var hasEnumBug = !{toString: null}.propertyIsEnumerable('toString');
   var nonEnumerableProps = ['valueOf', 'isPrototypeOf', 'toString',
-                      'propertyIsEnumerable', 'hasOwnProperty', 'toLocaleString'];
+    'propertyIsEnumerable', 'hasOwnProperty', 'toLocaleString'];
 
-  function collectNonEnumProps(obj, keys) {
+  var collectNonEnumProps = function(obj, keys) {
     var nonEnumIdx = nonEnumerableProps.length;
     var constructor = obj.constructor;
-    var proto = (_.isFunction(constructor) && constructor.prototype) || ObjProto;
+    var proto = _.isFunction(constructor) && constructor.prototype || ObjProto;
 
     // Constructor is a special case.
     var prop = 'constructor';
-    if (_.has(obj, prop) && !_.contains(keys, prop)) keys.push(prop);
+    if (has(obj, prop) && !_.contains(keys, prop)) keys.push(prop);
 
     while (nonEnumIdx--) {
       prop = nonEnumerableProps[nonEnumIdx];
@@ -1485,15 +1594,15 @@ module.exports = Tile;
         keys.push(prop);
       }
     }
-  }
+  };
 
   // Retrieve the names of an object's own properties.
-  // Delegates to **ECMAScript 5**'s native `Object.keys`
+  // Delegates to **ECMAScript 5**'s native `Object.keys`.
   _.keys = function(obj) {
     if (!_.isObject(obj)) return [];
     if (nativeKeys) return nativeKeys(obj);
     var keys = [];
-    for (var key in obj) if (_.has(obj, key)) keys.push(key);
+    for (var key in obj) if (has(obj, key)) keys.push(key);
     // Ahem, IE < 9.
     if (hasEnumBug) collectNonEnumProps(obj, keys);
     return keys;
@@ -1520,22 +1629,22 @@ module.exports = Tile;
     return values;
   };
 
-  // Returns the results of applying the iteratee to each element of the object
-  // In contrast to _.map it returns an object
+  // Returns the results of applying the iteratee to each element of the object.
+  // In contrast to _.map it returns an object.
   _.mapObject = function(obj, iteratee, context) {
     iteratee = cb(iteratee, context);
-    var keys =  _.keys(obj),
-          length = keys.length,
-          results = {},
-          currentKey;
-      for (var index = 0; index < length; index++) {
-        currentKey = keys[index];
-        results[currentKey] = iteratee(obj[currentKey], currentKey, obj);
-      }
-      return results;
+    var keys = _.keys(obj),
+        length = keys.length,
+        results = {};
+    for (var index = 0; index < length; index++) {
+      var currentKey = keys[index];
+      results[currentKey] = iteratee(obj[currentKey], currentKey, obj);
+    }
+    return results;
   };
 
   // Convert an object into a list of `[key, value]` pairs.
+  // The opposite of _.object.
   _.pairs = function(obj) {
     var keys = _.keys(obj);
     var length = keys.length;
@@ -1557,7 +1666,7 @@ module.exports = Tile;
   };
 
   // Return a sorted list of the function names available on the object.
-  // Aliased as `methods`
+  // Aliased as `methods`.
   _.functions = _.methods = function(obj) {
     var names = [];
     for (var key in obj) {
@@ -1566,14 +1675,33 @@ module.exports = Tile;
     return names.sort();
   };
 
+  // An internal function for creating assigner functions.
+  var createAssigner = function(keysFunc, defaults) {
+    return function(obj) {
+      var length = arguments.length;
+      if (defaults) obj = Object(obj);
+      if (length < 2 || obj == null) return obj;
+      for (var index = 1; index < length; index++) {
+        var source = arguments[index],
+            keys = keysFunc(source),
+            l = keys.length;
+        for (var i = 0; i < l; i++) {
+          var key = keys[i];
+          if (!defaults || obj[key] === void 0) obj[key] = source[key];
+        }
+      }
+      return obj;
+    };
+  };
+
   // Extend a given object with all the properties in passed-in object(s).
   _.extend = createAssigner(_.allKeys);
 
-  // Assigns a given object with all the own properties in the passed-in object(s)
+  // Assigns a given object with all the own properties in the passed-in object(s).
   // (https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object/assign)
   _.extendOwn = _.assign = createAssigner(_.keys);
 
-  // Returns the first key on an object that passes a predicate test
+  // Returns the first key on an object that passes a predicate test.
   _.findKey = function(obj, predicate, context) {
     predicate = cb(predicate, context);
     var keys = _.keys(obj), key;
@@ -1583,16 +1711,21 @@ module.exports = Tile;
     }
   };
 
+  // Internal pick helper function to determine if `obj` has key `key`.
+  var keyInObj = function(value, key, obj) {
+    return key in obj;
+  };
+
   // Return a copy of the object only containing the whitelisted properties.
-  _.pick = function(object, oiteratee, context) {
-    var result = {}, obj = object, iteratee, keys;
+  _.pick = restArguments(function(obj, keys) {
+    var result = {}, iteratee = keys[0];
     if (obj == null) return result;
-    if (_.isFunction(oiteratee)) {
+    if (_.isFunction(iteratee)) {
+      if (keys.length > 1) iteratee = optimizeCb(iteratee, keys[1]);
       keys = _.allKeys(obj);
-      iteratee = optimizeCb(oiteratee, context);
     } else {
-      keys = flatten(arguments, false, false, 1);
-      iteratee = function(value, key, obj) { return key in obj; };
+      iteratee = keyInObj;
+      keys = flatten(keys, false, false);
       obj = Object(obj);
     }
     for (var i = 0, length = keys.length; i < length; i++) {
@@ -1601,20 +1734,22 @@ module.exports = Tile;
       if (iteratee(value, key, obj)) result[key] = value;
     }
     return result;
-  };
+  });
 
-   // Return a copy of the object without the blacklisted properties.
-  _.omit = function(obj, iteratee, context) {
+  // Return a copy of the object without the blacklisted properties.
+  _.omit = restArguments(function(obj, keys) {
+    var iteratee = keys[0], context;
     if (_.isFunction(iteratee)) {
       iteratee = _.negate(iteratee);
+      if (keys.length > 1) context = keys[1];
     } else {
-      var keys = _.map(flatten(arguments, false, false, 1), String);
+      keys = _.map(flatten(keys, false, false), String);
       iteratee = function(value, key) {
         return !_.contains(keys, key);
       };
     }
     return _.pick(obj, iteratee, context);
-  };
+  });
 
   // Fill in a given object with default properties.
   _.defaults = createAssigner(_.allKeys, true);
@@ -1656,12 +1791,23 @@ module.exports = Tile;
 
 
   // Internal recursive comparison function for `isEqual`.
-  var eq = function(a, b, aStack, bStack) {
+  var eq, deepEq;
+  eq = function(a, b, aStack, bStack) {
     // Identical objects are equal. `0 === -0`, but they aren't identical.
     // See the [Harmony `egal` proposal](http://wiki.ecmascript.org/doku.php?id=harmony:egal).
     if (a === b) return a !== 0 || 1 / a === 1 / b;
-    // A strict comparison is necessary because `null == undefined`.
-    if (a == null || b == null) return a === b;
+    // `null` or `undefined` only equal to itself (strict comparison).
+    if (a == null || b == null) return false;
+    // `NaN`s are equivalent, but non-reflexive.
+    if (a !== a) return b !== b;
+    // Exhaust primitive checks
+    var type = typeof a;
+    if (type !== 'function' && type !== 'object' && typeof b != 'object') return false;
+    return deepEq(a, b, aStack, bStack);
+  };
+
+  // Internal recursive comparison function for `isEqual`.
+  deepEq = function(a, b, aStack, bStack) {
     // Unwrap any wrapped objects.
     if (a instanceof _) a = a._wrapped;
     if (b instanceof _) b = b._wrapped;
@@ -1678,7 +1824,7 @@ module.exports = Tile;
         return '' + a === '' + b;
       case '[object Number]':
         // `NaN`s are equivalent, but non-reflexive.
-        // Object(NaN) is equivalent to NaN
+        // Object(NaN) is equivalent to NaN.
         if (+a !== +a) return +b !== +b;
         // An `egal` comparison is performed for other numeric values.
         return +a === 0 ? 1 / +a === 1 / b : +a === +b;
@@ -1688,6 +1834,8 @@ module.exports = Tile;
         // millisecond representations. Note that invalid dates with millisecond representations
         // of `NaN` are not equivalent.
         return +a === +b;
+      case '[object Symbol]':
+        return SymbolProto.valueOf.call(a) === SymbolProto.valueOf.call(b);
     }
 
     var areArrays = className === '[object Array]';
@@ -1739,7 +1887,7 @@ module.exports = Tile;
       while (length--) {
         // Deep compare each member
         key = keys[length];
-        if (!(_.has(b, key) && eq(a[key], b[key], aStack, bStack))) return false;
+        if (!(has(b, key) && eq(a[key], b[key], aStack, bStack))) return false;
       }
     }
     // Remove the first object from the stack of traversed objects.
@@ -1778,8 +1926,8 @@ module.exports = Tile;
     return type === 'function' || type === 'object' && !!obj;
   };
 
-  // Add some isType methods: isArguments, isFunction, isString, isNumber, isDate, isRegExp, isError.
-  _.each(['Arguments', 'Function', 'String', 'Number', 'Date', 'RegExp', 'Error'], function(name) {
+  // Add some isType methods: isArguments, isFunction, isString, isNumber, isDate, isRegExp, isError, isMap, isWeakMap, isSet, isWeakSet.
+  _.each(['Arguments', 'Function', 'String', 'Number', 'Date', 'RegExp', 'Error', 'Symbol', 'Map', 'WeakMap', 'Set', 'WeakSet'], function(name) {
     _['is' + name] = function(obj) {
       return toString.call(obj) === '[object ' + name + ']';
     };
@@ -1789,13 +1937,14 @@ module.exports = Tile;
   // there isn't any inspectable "Arguments" type.
   if (!_.isArguments(arguments)) {
     _.isArguments = function(obj) {
-      return _.has(obj, 'callee');
+      return has(obj, 'callee');
     };
   }
 
   // Optimize `isFunction` if appropriate. Work around some typeof bugs in old v8,
-  // IE 11 (#1621), and in Safari 8 (#1929).
-  if (typeof /./ != 'function' && typeof Int8Array != 'object') {
+  // IE 11 (#1621), Safari 8 (#1929), and PhantomJS (#2236).
+  var nodelist = root.document && root.document.childNodes;
+  if (typeof /./ != 'function' && typeof Int8Array != 'object' && typeof nodelist != 'function') {
     _.isFunction = function(obj) {
       return typeof obj == 'function' || false;
     };
@@ -1803,12 +1952,12 @@ module.exports = Tile;
 
   // Is a given object a finite number?
   _.isFinite = function(obj) {
-    return isFinite(obj) && !isNaN(parseFloat(obj));
+    return !_.isSymbol(obj) && isFinite(obj) && !isNaN(parseFloat(obj));
   };
 
-  // Is the given value `NaN`? (NaN is the only number which does not equal itself).
+  // Is the given value `NaN`?
   _.isNaN = function(obj) {
-    return _.isNumber(obj) && obj !== +obj;
+    return _.isNumber(obj) && isNaN(obj);
   };
 
   // Is a given value a boolean?
@@ -1828,8 +1977,19 @@ module.exports = Tile;
 
   // Shortcut function for checking if an object has a given property directly
   // on itself (in other words, not on a prototype).
-  _.has = function(obj, key) {
-    return obj != null && hasOwnProperty.call(obj, key);
+  _.has = function(obj, path) {
+    if (!_.isArray(path)) {
+      return has(obj, path);
+    }
+    var length = path.length;
+    for (var i = 0; i < length; i++) {
+      var key = path[i];
+      if (obj == null || !hasOwnProperty.call(obj, key)) {
+        return false;
+      }
+      obj = obj[key];
+    }
+    return !!length;
   };
 
   // Utility Functions
@@ -1856,12 +2016,24 @@ module.exports = Tile;
 
   _.noop = function(){};
 
-  _.property = property;
+  // Creates a function that, when passed an object, will traverse that object’s
+  // properties down the given `path`, specified as an array of keys or indexes.
+  _.property = function(path) {
+    if (!_.isArray(path)) {
+      return shallowProperty(path);
+    }
+    return function(obj) {
+      return deepGet(obj, path);
+    };
+  };
 
   // Generates a function for a given object that returns a given property.
   _.propertyOf = function(obj) {
-    return obj == null ? function(){} : function(key) {
-      return obj[key];
+    if (obj == null) {
+      return function(){};
+    }
+    return function(path) {
+      return !_.isArray(path) ? obj[path] : deepGet(obj, path);
     };
   };
 
@@ -1896,7 +2068,7 @@ module.exports = Tile;
     return new Date().getTime();
   };
 
-   // List of HTML entities for escaping.
+  // List of HTML entities for escaping.
   var escapeMap = {
     '&': '&amp;',
     '<': '&lt;',
@@ -1912,7 +2084,7 @@ module.exports = Tile;
     var escaper = function(match) {
       return map[match];
     };
-    // Regexes for identifying a key that needs to be escaped
+    // Regexes for identifying a key that needs to be escaped.
     var source = '(?:' + _.keys(map).join('|') + ')';
     var testRegexp = RegExp(source);
     var replaceRegexp = RegExp(source, 'g');
@@ -1924,14 +2096,24 @@ module.exports = Tile;
   _.escape = createEscaper(escapeMap);
   _.unescape = createEscaper(unescapeMap);
 
-  // If the value of the named `property` is a function then invoke it with the
-  // `object` as context; otherwise, return it.
-  _.result = function(object, property, fallback) {
-    var value = object == null ? void 0 : object[property];
-    if (value === void 0) {
-      value = fallback;
+  // Traverses the children of `obj` along `path`. If a child is a function, it
+  // is invoked with its parent as context. Returns the value of the final
+  // child, or `fallback` if any child is undefined.
+  _.result = function(obj, path, fallback) {
+    if (!_.isArray(path)) path = [path];
+    var length = path.length;
+    if (!length) {
+      return _.isFunction(fallback) ? fallback.call(obj) : fallback;
     }
-    return _.isFunction(value) ? value.call(object) : value;
+    for (var i = 0; i < length; i++) {
+      var prop = obj == null ? void 0 : obj[path[i]];
+      if (prop === void 0) {
+        prop = fallback;
+        i = length; // Ensure we don't continue iterating.
+      }
+      obj = _.isFunction(prop) ? prop.call(obj) : prop;
+    }
+    return obj;
   };
 
   // Generate a unique integer id (unique within the entire client session).
@@ -1945,9 +2127,9 @@ module.exports = Tile;
   // By default, Underscore uses ERB-style template delimiters, change the
   // following template settings to use alternative delimiters.
   _.templateSettings = {
-    evaluate    : /<%([\s\S]+?)%>/g,
-    interpolate : /<%=([\s\S]+?)%>/g,
-    escape      : /<%-([\s\S]+?)%>/g
+    evaluate: /<%([\s\S]+?)%>/g,
+    interpolate: /<%=([\s\S]+?)%>/g,
+    escape: /<%-([\s\S]+?)%>/g
   };
 
   // When customizing `templateSettings`, if you don't want to define an
@@ -1958,15 +2140,15 @@ module.exports = Tile;
   // Certain characters need to be escaped so that they can be put into a
   // string literal.
   var escapes = {
-    "'":      "'",
-    '\\':     '\\',
-    '\r':     'r',
-    '\n':     'n',
+    "'": "'",
+    '\\': '\\',
+    '\r': 'r',
+    '\n': 'n',
     '\u2028': 'u2028',
     '\u2029': 'u2029'
   };
 
-  var escaper = /\\|'|\r|\n|\u2028|\u2029/g;
+  var escapeRegExp = /\\|'|\r|\n|\u2028|\u2029/g;
 
   var escapeChar = function(match) {
     return '\\' + escapes[match];
@@ -1991,7 +2173,7 @@ module.exports = Tile;
     var index = 0;
     var source = "__p+='";
     text.replace(matcher, function(match, escape, interpolate, evaluate, offset) {
-      source += text.slice(index, offset).replace(escaper, escapeChar);
+      source += text.slice(index, offset).replace(escapeRegExp, escapeChar);
       index = offset + match.length;
 
       if (escape) {
@@ -2002,7 +2184,7 @@ module.exports = Tile;
         source += "';\n" + evaluate + "\n__p+='";
       }
 
-      // Adobe VMs need the match returned to produce the correct offest.
+      // Adobe VMs need the match returned to produce the correct offset.
       return match;
     });
     source += "';\n";
@@ -2014,8 +2196,9 @@ module.exports = Tile;
       "print=function(){__p+=__j.call(arguments,'');};\n" +
       source + 'return __p;\n';
 
+    var render;
     try {
-      var render = new Function(settings.variable || 'obj', '_', source);
+      render = new Function(settings.variable || 'obj', '_', source);
     } catch (e) {
       e.source = source;
       throw e;
@@ -2046,7 +2229,7 @@ module.exports = Tile;
   // underscore functions. Wrapped objects may be chained.
 
   // Helper function to continue chaining intermediate results.
-  var result = function(instance, obj) {
+  var chainResult = function(instance, obj) {
     return instance._chain ? _(obj).chain() : obj;
   };
 
@@ -2057,9 +2240,10 @@ module.exports = Tile;
       _.prototype[name] = function() {
         var args = [this._wrapped];
         push.apply(args, arguments);
-        return result(this, func.apply(_, args));
+        return chainResult(this, func.apply(_, args));
       };
     });
+    return _;
   };
 
   // Add all of the Underscore functions to the wrapper object.
@@ -2072,7 +2256,7 @@ module.exports = Tile;
       var obj = this._wrapped;
       method.apply(obj, arguments);
       if ((name === 'shift' || name === 'splice') && obj.length === 0) delete obj[0];
-      return result(this, obj);
+      return chainResult(this, obj);
     };
   });
 
@@ -2080,7 +2264,7 @@ module.exports = Tile;
   _.each(['concat', 'join', 'slice'], function(name) {
     var method = ArrayProto[name];
     _.prototype[name] = function() {
-      return result(this, method.apply(this._wrapped, arguments));
+      return chainResult(this, method.apply(this._wrapped, arguments));
     };
   });
 
@@ -2094,7 +2278,7 @@ module.exports = Tile;
   _.prototype.valueOf = _.prototype.toJSON = _.prototype.value;
 
   _.prototype.toString = function() {
-    return '' + this._wrapped;
+    return String(this._wrapped);
   };
 
   // AMD registration happens at the end for compatibility with AMD loaders
@@ -2104,12 +2288,1339 @@ module.exports = Tile;
   // popular enough to be bundled in a third party lib, but not be part of
   // an AMD load request. Those cases could generate an error when an
   // anonymous define() is called outside of a loader request.
-  if (typeof define === 'function' && define.amd) {
+  if (typeof define == 'function' && define.amd) {
     define('underscore', [], function() {
       return _;
     });
   }
-}.call(this));
+}());
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],5:[function(require,module,exports){
+exports = module.exports = Victor;
+
+/**
+ * # Victor - A JavaScript 2D vector class with methods for common vector operations
+ */
+
+/**
+ * Constructor. Will also work without the `new` keyword
+ *
+ * ### Examples:
+ *     var vec1 = new Victor(100, 50);
+ *     var vec2 = Victor(42, 1337);
+ *
+ * @param {Number} x Value of the x axis
+ * @param {Number} y Value of the y axis
+ * @return {Victor}
+ * @api public
+ */
+function Victor (x, y) {
+	if (!(this instanceof Victor)) {
+		return new Victor(x, y);
+	}
+
+	/**
+	 * The X axis
+	 *
+	 * ### Examples:
+	 *     var vec = new Victor.fromArray(42, 21);
+	 *
+	 *     vec.x;
+	 *     // => 42
+	 *
+	 * @api public
+	 */
+	this.x = x || 0;
+
+	/**
+	 * The Y axis
+	 *
+	 * ### Examples:
+	 *     var vec = new Victor.fromArray(42, 21);
+	 *
+	 *     vec.y;
+	 *     // => 21
+	 *
+	 * @api public
+	 */
+	this.y = y || 0;
+};
+
+/**
+ * # Static
+ */
+
+/**
+ * Creates a new instance from an array
+ *
+ * ### Examples:
+ *     var vec = Victor.fromArray([42, 21]);
+ *
+ *     vec.toString();
+ *     // => x:42, y:21
+ *
+ * @name Victor.fromArray
+ * @param {Array} array Array with the x and y values at index 0 and 1 respectively
+ * @return {Victor} The new instance
+ * @api public
+ */
+Victor.fromArray = function (arr) {
+	return new Victor(arr[0] || 0, arr[1] || 0);
+};
+
+/**
+ * Creates a new instance from an object
+ *
+ * ### Examples:
+ *     var vec = Victor.fromObject({ x: 42, y: 21 });
+ *
+ *     vec.toString();
+ *     // => x:42, y:21
+ *
+ * @name Victor.fromObject
+ * @param {Object} obj Object with the values for x and y
+ * @return {Victor} The new instance
+ * @api public
+ */
+Victor.fromObject = function (obj) {
+	return new Victor(obj.x || 0, obj.y || 0);
+};
+
+/**
+ * # Manipulation
+ *
+ * These functions are chainable.
+ */
+
+/**
+ * Adds another vector's X axis to this one
+ *
+ * ### Examples:
+ *     var vec1 = new Victor(10, 10);
+ *     var vec2 = new Victor(20, 30);
+ *
+ *     vec1.addX(vec2);
+ *     vec1.toString();
+ *     // => x:30, y:10
+ *
+ * @param {Victor} vector The other vector you want to add to this one
+ * @return {Victor} `this` for chaining capabilities
+ * @api public
+ */
+Victor.prototype.addX = function (vec) {
+	this.x += vec.x;
+	return this;
+};
+
+/**
+ * Adds another vector's Y axis to this one
+ *
+ * ### Examples:
+ *     var vec1 = new Victor(10, 10);
+ *     var vec2 = new Victor(20, 30);
+ *
+ *     vec1.addY(vec2);
+ *     vec1.toString();
+ *     // => x:10, y:40
+ *
+ * @param {Victor} vector The other vector you want to add to this one
+ * @return {Victor} `this` for chaining capabilities
+ * @api public
+ */
+Victor.prototype.addY = function (vec) {
+	this.y += vec.y;
+	return this;
+};
+
+/**
+ * Adds another vector to this one
+ *
+ * ### Examples:
+ *     var vec1 = new Victor(10, 10);
+ *     var vec2 = new Victor(20, 30);
+ *
+ *     vec1.add(vec2);
+ *     vec1.toString();
+ *     // => x:30, y:40
+ *
+ * @param {Victor} vector The other vector you want to add to this one
+ * @return {Victor} `this` for chaining capabilities
+ * @api public
+ */
+Victor.prototype.add = function (vec) {
+	this.x += vec.x;
+	this.y += vec.y;
+	return this;
+};
+
+/**
+ * Adds the given scalar to both vector axis
+ *
+ * ### Examples:
+ *     var vec = new Victor(1, 2);
+ *
+ *     vec.addScalar(2);
+ *     vec.toString();
+ *     // => x: 3, y: 4
+ *
+ * @param {Number} scalar The scalar to add
+ * @return {Victor} `this` for chaining capabilities
+ * @api public
+ */
+Victor.prototype.addScalar = function (scalar) {
+	this.x += scalar;
+	this.y += scalar;
+	return this;
+};
+
+/**
+ * Adds the given scalar to the X axis
+ *
+ * ### Examples:
+ *     var vec = new Victor(1, 2);
+ *
+ *     vec.addScalarX(2);
+ *     vec.toString();
+ *     // => x: 3, y: 2
+ *
+ * @param {Number} scalar The scalar to add
+ * @return {Victor} `this` for chaining capabilities
+ * @api public
+ */
+Victor.prototype.addScalarX = function (scalar) {
+	this.x += scalar;
+	return this;
+};
+
+/**
+ * Adds the given scalar to the Y axis
+ *
+ * ### Examples:
+ *     var vec = new Victor(1, 2);
+ *
+ *     vec.addScalarY(2);
+ *     vec.toString();
+ *     // => x: 1, y: 4
+ *
+ * @param {Number} scalar The scalar to add
+ * @return {Victor} `this` for chaining capabilities
+ * @api public
+ */
+Victor.prototype.addScalarY = function (scalar) {
+	this.y += scalar;
+	return this;
+};
+
+/**
+ * Subtracts the X axis of another vector from this one
+ *
+ * ### Examples:
+ *     var vec1 = new Victor(100, 50);
+ *     var vec2 = new Victor(20, 30);
+ *
+ *     vec1.subtractX(vec2);
+ *     vec1.toString();
+ *     // => x:80, y:50
+ *
+ * @param {Victor} vector The other vector you want subtract from this one
+ * @return {Victor} `this` for chaining capabilities
+ * @api public
+ */
+Victor.prototype.subtractX = function (vec) {
+	this.x -= vec.x;
+	return this;
+};
+
+/**
+ * Subtracts the Y axis of another vector from this one
+ *
+ * ### Examples:
+ *     var vec1 = new Victor(100, 50);
+ *     var vec2 = new Victor(20, 30);
+ *
+ *     vec1.subtractY(vec2);
+ *     vec1.toString();
+ *     // => x:100, y:20
+ *
+ * @param {Victor} vector The other vector you want subtract from this one
+ * @return {Victor} `this` for chaining capabilities
+ * @api public
+ */
+Victor.prototype.subtractY = function (vec) {
+	this.y -= vec.y;
+	return this;
+};
+
+/**
+ * Subtracts another vector from this one
+ *
+ * ### Examples:
+ *     var vec1 = new Victor(100, 50);
+ *     var vec2 = new Victor(20, 30);
+ *
+ *     vec1.subtract(vec2);
+ *     vec1.toString();
+ *     // => x:80, y:20
+ *
+ * @param {Victor} vector The other vector you want subtract from this one
+ * @return {Victor} `this` for chaining capabilities
+ * @api public
+ */
+Victor.prototype.subtract = function (vec) {
+	this.x -= vec.x;
+	this.y -= vec.y;
+	return this;
+};
+
+/**
+ * Subtracts the given scalar from both axis
+ *
+ * ### Examples:
+ *     var vec = new Victor(100, 200);
+ *
+ *     vec.subtractScalar(20);
+ *     vec.toString();
+ *     // => x: 80, y: 180
+ *
+ * @param {Number} scalar The scalar to subtract
+ * @return {Victor} `this` for chaining capabilities
+ * @api public
+ */
+Victor.prototype.subtractScalar = function (scalar) {
+	this.x -= scalar;
+	this.y -= scalar;
+	return this;
+};
+
+/**
+ * Subtracts the given scalar from the X axis
+ *
+ * ### Examples:
+ *     var vec = new Victor(100, 200);
+ *
+ *     vec.subtractScalarX(20);
+ *     vec.toString();
+ *     // => x: 80, y: 200
+ *
+ * @param {Number} scalar The scalar to subtract
+ * @return {Victor} `this` for chaining capabilities
+ * @api public
+ */
+Victor.prototype.subtractScalarX = function (scalar) {
+	this.x -= scalar;
+	return this;
+};
+
+/**
+ * Subtracts the given scalar from the Y axis
+ *
+ * ### Examples:
+ *     var vec = new Victor(100, 200);
+ *
+ *     vec.subtractScalarY(20);
+ *     vec.toString();
+ *     // => x: 100, y: 180
+ *
+ * @param {Number} scalar The scalar to subtract
+ * @return {Victor} `this` for chaining capabilities
+ * @api public
+ */
+Victor.prototype.subtractScalarY = function (scalar) {
+	this.y -= scalar;
+	return this;
+};
+
+/**
+ * Divides the X axis by the x component of given vector
+ *
+ * ### Examples:
+ *     var vec = new Victor(100, 50);
+ *     var vec2 = new Victor(2, 0);
+ *
+ *     vec.divideX(vec2);
+ *     vec.toString();
+ *     // => x:50, y:50
+ *
+ * @param {Victor} vector The other vector you want divide by
+ * @return {Victor} `this` for chaining capabilities
+ * @api public
+ */
+Victor.prototype.divideX = function (vector) {
+	this.x /= vector.x;
+	return this;
+};
+
+/**
+ * Divides the Y axis by the y component of given vector
+ *
+ * ### Examples:
+ *     var vec = new Victor(100, 50);
+ *     var vec2 = new Victor(0, 2);
+ *
+ *     vec.divideY(vec2);
+ *     vec.toString();
+ *     // => x:100, y:25
+ *
+ * @param {Victor} vector The other vector you want divide by
+ * @return {Victor} `this` for chaining capabilities
+ * @api public
+ */
+Victor.prototype.divideY = function (vector) {
+	this.y /= vector.y;
+	return this;
+};
+
+/**
+ * Divides both vector axis by a axis values of given vector
+ *
+ * ### Examples:
+ *     var vec = new Victor(100, 50);
+ *     var vec2 = new Victor(2, 2);
+ *
+ *     vec.divide(vec2);
+ *     vec.toString();
+ *     // => x:50, y:25
+ *
+ * @param {Victor} vector The vector to divide by
+ * @return {Victor} `this` for chaining capabilities
+ * @api public
+ */
+Victor.prototype.divide = function (vector) {
+	this.x /= vector.x;
+	this.y /= vector.y;
+	return this;
+};
+
+/**
+ * Divides both vector axis by the given scalar value
+ *
+ * ### Examples:
+ *     var vec = new Victor(100, 50);
+ *
+ *     vec.divideScalar(2);
+ *     vec.toString();
+ *     // => x:50, y:25
+ *
+ * @param {Number} The scalar to divide by
+ * @return {Victor} `this` for chaining capabilities
+ * @api public
+ */
+Victor.prototype.divideScalar = function (scalar) {
+	if (scalar !== 0) {
+		this.x /= scalar;
+		this.y /= scalar;
+	} else {
+		this.x = 0;
+		this.y = 0;
+	}
+
+	return this;
+};
+
+/**
+ * Divides the X axis by the given scalar value
+ *
+ * ### Examples:
+ *     var vec = new Victor(100, 50);
+ *
+ *     vec.divideScalarX(2);
+ *     vec.toString();
+ *     // => x:50, y:50
+ *
+ * @param {Number} The scalar to divide by
+ * @return {Victor} `this` for chaining capabilities
+ * @api public
+ */
+Victor.prototype.divideScalarX = function (scalar) {
+	if (scalar !== 0) {
+		this.x /= scalar;
+	} else {
+		this.x = 0;
+	}
+	return this;
+};
+
+/**
+ * Divides the Y axis by the given scalar value
+ *
+ * ### Examples:
+ *     var vec = new Victor(100, 50);
+ *
+ *     vec.divideScalarY(2);
+ *     vec.toString();
+ *     // => x:100, y:25
+ *
+ * @param {Number} The scalar to divide by
+ * @return {Victor} `this` for chaining capabilities
+ * @api public
+ */
+Victor.prototype.divideScalarY = function (scalar) {
+	if (scalar !== 0) {
+		this.y /= scalar;
+	} else {
+		this.y = 0;
+	}
+	return this;
+};
+
+/**
+ * Inverts the X axis
+ *
+ * ### Examples:
+ *     var vec = new Victor(100, 50);
+ *
+ *     vec.invertX();
+ *     vec.toString();
+ *     // => x:-100, y:50
+ *
+ * @return {Victor} `this` for chaining capabilities
+ * @api public
+ */
+Victor.prototype.invertX = function () {
+	this.x *= -1;
+	return this;
+};
+
+/**
+ * Inverts the Y axis
+ *
+ * ### Examples:
+ *     var vec = new Victor(100, 50);
+ *
+ *     vec.invertY();
+ *     vec.toString();
+ *     // => x:100, y:-50
+ *
+ * @return {Victor} `this` for chaining capabilities
+ * @api public
+ */
+Victor.prototype.invertY = function () {
+	this.y *= -1;
+	return this;
+};
+
+/**
+ * Inverts both axis
+ *
+ * ### Examples:
+ *     var vec = new Victor(100, 50);
+ *
+ *     vec.invert();
+ *     vec.toString();
+ *     // => x:-100, y:-50
+ *
+ * @return {Victor} `this` for chaining capabilities
+ * @api public
+ */
+Victor.prototype.invert = function () {
+	this.invertX();
+	this.invertY();
+	return this;
+};
+
+/**
+ * Multiplies the X axis by X component of given vector
+ *
+ * ### Examples:
+ *     var vec = new Victor(100, 50);
+ *     var vec2 = new Victor(2, 0);
+ *
+ *     vec.multiplyX(vec2);
+ *     vec.toString();
+ *     // => x:200, y:50
+ *
+ * @param {Victor} vector The vector to multiply the axis with
+ * @return {Victor} `this` for chaining capabilities
+ * @api public
+ */
+Victor.prototype.multiplyX = function (vector) {
+	this.x *= vector.x;
+	return this;
+};
+
+/**
+ * Multiplies the Y axis by Y component of given vector
+ *
+ * ### Examples:
+ *     var vec = new Victor(100, 50);
+ *     var vec2 = new Victor(0, 2);
+ *
+ *     vec.multiplyX(vec2);
+ *     vec.toString();
+ *     // => x:100, y:100
+ *
+ * @param {Victor} vector The vector to multiply the axis with
+ * @return {Victor} `this` for chaining capabilities
+ * @api public
+ */
+Victor.prototype.multiplyY = function (vector) {
+	this.y *= vector.y;
+	return this;
+};
+
+/**
+ * Multiplies both vector axis by values from a given vector
+ *
+ * ### Examples:
+ *     var vec = new Victor(100, 50);
+ *     var vec2 = new Victor(2, 2);
+ *
+ *     vec.multiply(vec2);
+ *     vec.toString();
+ *     // => x:200, y:100
+ *
+ * @param {Victor} vector The vector to multiply by
+ * @return {Victor} `this` for chaining capabilities
+ * @api public
+ */
+Victor.prototype.multiply = function (vector) {
+	this.x *= vector.x;
+	this.y *= vector.y;
+	return this;
+};
+
+/**
+ * Multiplies both vector axis by the given scalar value
+ *
+ * ### Examples:
+ *     var vec = new Victor(100, 50);
+ *
+ *     vec.multiplyScalar(2);
+ *     vec.toString();
+ *     // => x:200, y:100
+ *
+ * @param {Number} The scalar to multiply by
+ * @return {Victor} `this` for chaining capabilities
+ * @api public
+ */
+Victor.prototype.multiplyScalar = function (scalar) {
+	this.x *= scalar;
+	this.y *= scalar;
+	return this;
+};
+
+/**
+ * Multiplies the X axis by the given scalar
+ *
+ * ### Examples:
+ *     var vec = new Victor(100, 50);
+ *
+ *     vec.multiplyScalarX(2);
+ *     vec.toString();
+ *     // => x:200, y:50
+ *
+ * @param {Number} The scalar to multiply the axis with
+ * @return {Victor} `this` for chaining capabilities
+ * @api public
+ */
+Victor.prototype.multiplyScalarX = function (scalar) {
+	this.x *= scalar;
+	return this;
+};
+
+/**
+ * Multiplies the Y axis by the given scalar
+ *
+ * ### Examples:
+ *     var vec = new Victor(100, 50);
+ *
+ *     vec.multiplyScalarY(2);
+ *     vec.toString();
+ *     // => x:100, y:100
+ *
+ * @param {Number} The scalar to multiply the axis with
+ * @return {Victor} `this` for chaining capabilities
+ * @api public
+ */
+Victor.prototype.multiplyScalarY = function (scalar) {
+	this.y *= scalar;
+	return this;
+};
+
+/**
+ * Normalize
+ *
+ * @return {Victor} `this` for chaining capabilities
+ * @api public
+ */
+Victor.prototype.normalize = function () {
+	var length = this.length();
+
+	if (length === 0) {
+		this.x = 1;
+		this.y = 0;
+	} else {
+		this.divide(Victor(length, length));
+	}
+	return this;
+};
+
+Victor.prototype.norm = Victor.prototype.normalize;
+
+/**
+ * If the absolute vector axis is greater than `max`, multiplies the axis by `factor`
+ *
+ * ### Examples:
+ *     var vec = new Victor(100, 50);
+ *
+ *     vec.limit(80, 0.9);
+ *     vec.toString();
+ *     // => x:90, y:50
+ *
+ * @param {Number} max The maximum value for both x and y axis
+ * @param {Number} factor Factor by which the axis are to be multiplied with
+ * @return {Victor} `this` for chaining capabilities
+ * @api public
+ */
+Victor.prototype.limit = function (max, factor) {
+	if (Math.abs(this.x) > max){ this.x *= factor; }
+	if (Math.abs(this.y) > max){ this.y *= factor; }
+	return this;
+};
+
+/**
+ * Randomizes both vector axis with a value between 2 vectors
+ *
+ * ### Examples:
+ *     var vec = new Victor(100, 50);
+ *
+ *     vec.randomize(new Victor(50, 60), new Victor(70, 80`));
+ *     vec.toString();
+ *     // => x:67, y:73
+ *
+ * @param {Victor} topLeft first vector
+ * @param {Victor} bottomRight second vector
+ * @return {Victor} `this` for chaining capabilities
+ * @api public
+ */
+Victor.prototype.randomize = function (topLeft, bottomRight) {
+	this.randomizeX(topLeft, bottomRight);
+	this.randomizeY(topLeft, bottomRight);
+
+	return this;
+};
+
+/**
+ * Randomizes the y axis with a value between 2 vectors
+ *
+ * ### Examples:
+ *     var vec = new Victor(100, 50);
+ *
+ *     vec.randomizeX(new Victor(50, 60), new Victor(70, 80`));
+ *     vec.toString();
+ *     // => x:55, y:50
+ *
+ * @param {Victor} topLeft first vector
+ * @param {Victor} bottomRight second vector
+ * @return {Victor} `this` for chaining capabilities
+ * @api public
+ */
+Victor.prototype.randomizeX = function (topLeft, bottomRight) {
+	var min = Math.min(topLeft.x, bottomRight.x);
+	var max = Math.max(topLeft.x, bottomRight.x);
+	this.x = random(min, max);
+	return this;
+};
+
+/**
+ * Randomizes the y axis with a value between 2 vectors
+ *
+ * ### Examples:
+ *     var vec = new Victor(100, 50);
+ *
+ *     vec.randomizeY(new Victor(50, 60), new Victor(70, 80`));
+ *     vec.toString();
+ *     // => x:100, y:66
+ *
+ * @param {Victor} topLeft first vector
+ * @param {Victor} bottomRight second vector
+ * @return {Victor} `this` for chaining capabilities
+ * @api public
+ */
+Victor.prototype.randomizeY = function (topLeft, bottomRight) {
+	var min = Math.min(topLeft.y, bottomRight.y);
+	var max = Math.max(topLeft.y, bottomRight.y);
+	this.y = random(min, max);
+	return this;
+};
+
+/**
+ * Randomly randomizes either axis between 2 vectors
+ *
+ * ### Examples:
+ *     var vec = new Victor(100, 50);
+ *
+ *     vec.randomizeAny(new Victor(50, 60), new Victor(70, 80));
+ *     vec.toString();
+ *     // => x:100, y:77
+ *
+ * @param {Victor} topLeft first vector
+ * @param {Victor} bottomRight second vector
+ * @return {Victor} `this` for chaining capabilities
+ * @api public
+ */
+Victor.prototype.randomizeAny = function (topLeft, bottomRight) {
+	if (!! Math.round(Math.random())) {
+		this.randomizeX(topLeft, bottomRight);
+	} else {
+		this.randomizeY(topLeft, bottomRight);
+	}
+	return this;
+};
+
+/**
+ * Rounds both axis to an integer value
+ *
+ * ### Examples:
+ *     var vec = new Victor(100.2, 50.9);
+ *
+ *     vec.unfloat();
+ *     vec.toString();
+ *     // => x:100, y:51
+ *
+ * @return {Victor} `this` for chaining capabilities
+ * @api public
+ */
+Victor.prototype.unfloat = function () {
+	this.x = Math.round(this.x);
+	this.y = Math.round(this.y);
+	return this;
+};
+
+/**
+ * Rounds both axis to a certain precision
+ *
+ * ### Examples:
+ *     var vec = new Victor(100.2, 50.9);
+ *
+ *     vec.unfloat();
+ *     vec.toString();
+ *     // => x:100, y:51
+ *
+ * @param {Number} Precision (default: 8)
+ * @return {Victor} `this` for chaining capabilities
+ * @api public
+ */
+Victor.prototype.toFixed = function (precision) {
+	if (typeof precision === 'undefined') { precision = 8; }
+	this.x = this.x.toFixed(precision);
+	this.y = this.y.toFixed(precision);
+	return this;
+};
+
+/**
+ * Performs a linear blend / interpolation of the X axis towards another vector
+ *
+ * ### Examples:
+ *     var vec1 = new Victor(100, 100);
+ *     var vec2 = new Victor(200, 200);
+ *
+ *     vec1.mixX(vec2, 0.5);
+ *     vec.toString();
+ *     // => x:150, y:100
+ *
+ * @param {Victor} vector The other vector
+ * @param {Number} amount The blend amount (optional, default: 0.5)
+ * @return {Victor} `this` for chaining capabilities
+ * @api public
+ */
+Victor.prototype.mixX = function (vec, amount) {
+	if (typeof amount === 'undefined') {
+		amount = 0.5;
+	}
+
+	this.x = (1 - amount) * this.x + amount * vec.x;
+	return this;
+};
+
+/**
+ * Performs a linear blend / interpolation of the Y axis towards another vector
+ *
+ * ### Examples:
+ *     var vec1 = new Victor(100, 100);
+ *     var vec2 = new Victor(200, 200);
+ *
+ *     vec1.mixY(vec2, 0.5);
+ *     vec.toString();
+ *     // => x:100, y:150
+ *
+ * @param {Victor} vector The other vector
+ * @param {Number} amount The blend amount (optional, default: 0.5)
+ * @return {Victor} `this` for chaining capabilities
+ * @api public
+ */
+Victor.prototype.mixY = function (vec, amount) {
+	if (typeof amount === 'undefined') {
+		amount = 0.5;
+	}
+
+	this.y = (1 - amount) * this.y + amount * vec.y;
+	return this;
+};
+
+/**
+ * Performs a linear blend / interpolation towards another vector
+ *
+ * ### Examples:
+ *     var vec1 = new Victor(100, 100);
+ *     var vec2 = new Victor(200, 200);
+ *
+ *     vec1.mix(vec2, 0.5);
+ *     vec.toString();
+ *     // => x:150, y:150
+ *
+ * @param {Victor} vector The other vector
+ * @param {Number} amount The blend amount (optional, default: 0.5)
+ * @return {Victor} `this` for chaining capabilities
+ * @api public
+ */
+Victor.prototype.mix = function (vec, amount) {
+	this.mixX(vec, amount);
+	this.mixY(vec, amount);
+	return this;
+};
+
+/**
+ * # Products
+ */
+
+/**
+ * Creates a clone of this vector
+ *
+ * ### Examples:
+ *     var vec1 = new Victor(10, 10);
+ *     var vec2 = vec1.clone();
+ *
+ *     vec2.toString();
+ *     // => x:10, y:10
+ *
+ * @return {Victor} A clone of the vector
+ * @api public
+ */
+Victor.prototype.clone = function () {
+	return new Victor(this.x, this.y);
+};
+
+/**
+ * Copies another vector's X component in to its own
+ *
+ * ### Examples:
+ *     var vec1 = new Victor(10, 10);
+ *     var vec2 = new Victor(20, 20);
+ *     var vec2 = vec1.copyX(vec1);
+ *
+ *     vec2.toString();
+ *     // => x:20, y:10
+ *
+ * @return {Victor} `this` for chaining capabilities
+ * @api public
+ */
+Victor.prototype.copyX = function (vec) {
+	this.x = vec.x;
+	return this;
+};
+
+/**
+ * Copies another vector's Y component in to its own
+ *
+ * ### Examples:
+ *     var vec1 = new Victor(10, 10);
+ *     var vec2 = new Victor(20, 20);
+ *     var vec2 = vec1.copyY(vec1);
+ *
+ *     vec2.toString();
+ *     // => x:10, y:20
+ *
+ * @return {Victor} `this` for chaining capabilities
+ * @api public
+ */
+Victor.prototype.copyY = function (vec) {
+	this.y = vec.y;
+	return this;
+};
+
+/**
+ * Copies another vector's X and Y components in to its own
+ *
+ * ### Examples:
+ *     var vec1 = new Victor(10, 10);
+ *     var vec2 = new Victor(20, 20);
+ *     var vec2 = vec1.copy(vec1);
+ *
+ *     vec2.toString();
+ *     // => x:20, y:20
+ *
+ * @return {Victor} `this` for chaining capabilities
+ * @api public
+ */
+Victor.prototype.copy = function (vec) {
+	this.copyX(vec);
+	this.copyY(vec);
+	return this;
+};
+
+/**
+ * Sets the vector to zero (0,0)
+ *
+ * ### Examples:
+ *     var vec1 = new Victor(10, 10);
+ *		 var1.zero();
+ *     vec1.toString();
+ *     // => x:0, y:0
+ *
+ * @return {Victor} `this` for chaining capabilities
+ * @api public
+ */
+Victor.prototype.zero = function () {
+	this.x = this.y = 0;
+	return this;
+};
+
+/**
+ * Calculates the dot product of this vector and another
+ *
+ * ### Examples:
+ *     var vec1 = new Victor(100, 50);
+ *     var vec2 = new Victor(200, 60);
+ *
+ *     vec1.dot(vec2);
+ *     // => 23000
+ *
+ * @param {Victor} vector The second vector
+ * @return {Number} Dot product
+ * @api public
+ */
+Victor.prototype.dot = function (vec2) {
+	return this.x * vec2.x + this.y * vec2.y;
+};
+
+Victor.prototype.cross = function (vec2) {
+	return (this.x * vec2.y ) - (this.y * vec2.x );
+};
+
+/**
+ * Projects a vector onto another vector, setting itself to the result.
+ *
+ * ### Examples:
+ *     var vec = new Victor(100, 0);
+ *     var vec2 = new Victor(100, 100);
+ *
+ *     vec.projectOnto(vec2);
+ *     vec.toString();
+ *     // => x:50, y:50
+ *
+ * @param {Victor} vector The other vector you want to project this vector onto
+ * @return {Victor} `this` for chaining capabilities
+ * @api public
+ */
+Victor.prototype.projectOnto = function (vec2) {
+    var coeff = ( (this.x * vec2.x)+(this.y * vec2.y) ) / ((vec2.x*vec2.x)+(vec2.y*vec2.y));
+    this.x = coeff * vec2.x;
+    this.y = coeff * vec2.y;
+    return this;
+};
+
+
+Victor.prototype.horizontalAngle = function () {
+	return Math.atan2(this.y, this.x);
+};
+
+Victor.prototype.horizontalAngleDeg = function () {
+	return radian2degrees(this.horizontalAngle());
+};
+
+Victor.prototype.verticalAngle = function () {
+	return Math.atan2(this.x, this.y);
+};
+
+Victor.prototype.verticalAngleDeg = function () {
+	return radian2degrees(this.verticalAngle());
+};
+
+Victor.prototype.angle = Victor.prototype.horizontalAngle;
+Victor.prototype.angleDeg = Victor.prototype.horizontalAngleDeg;
+Victor.prototype.direction = Victor.prototype.horizontalAngle;
+
+Victor.prototype.rotate = function (angle) {
+	var nx = (this.x * Math.cos(angle)) - (this.y * Math.sin(angle));
+	var ny = (this.x * Math.sin(angle)) + (this.y * Math.cos(angle));
+
+	this.x = nx;
+	this.y = ny;
+
+	return this;
+};
+
+Victor.prototype.rotateDeg = function (angle) {
+	angle = degrees2radian(angle);
+	return this.rotate(angle);
+};
+
+Victor.prototype.rotateTo = function(rotation) {
+	return this.rotate(rotation-this.angle());
+};
+
+Victor.prototype.rotateToDeg = function(rotation) {
+	rotation = degrees2radian(rotation);
+	return this.rotateTo(rotation);
+};
+
+Victor.prototype.rotateBy = function (rotation) {
+	var angle = this.angle() + rotation;
+
+	return this.rotate(angle);
+};
+
+Victor.prototype.rotateByDeg = function (rotation) {
+	rotation = degrees2radian(rotation);
+	return this.rotateBy(rotation);
+};
+
+/**
+ * Calculates the distance of the X axis between this vector and another
+ *
+ * ### Examples:
+ *     var vec1 = new Victor(100, 50);
+ *     var vec2 = new Victor(200, 60);
+ *
+ *     vec1.distanceX(vec2);
+ *     // => -100
+ *
+ * @param {Victor} vector The second vector
+ * @return {Number} Distance
+ * @api public
+ */
+Victor.prototype.distanceX = function (vec) {
+	return this.x - vec.x;
+};
+
+/**
+ * Same as `distanceX()` but always returns an absolute number
+ *
+ * ### Examples:
+ *     var vec1 = new Victor(100, 50);
+ *     var vec2 = new Victor(200, 60);
+ *
+ *     vec1.absDistanceX(vec2);
+ *     // => 100
+ *
+ * @param {Victor} vector The second vector
+ * @return {Number} Absolute distance
+ * @api public
+ */
+Victor.prototype.absDistanceX = function (vec) {
+	return Math.abs(this.distanceX(vec));
+};
+
+/**
+ * Calculates the distance of the Y axis between this vector and another
+ *
+ * ### Examples:
+ *     var vec1 = new Victor(100, 50);
+ *     var vec2 = new Victor(200, 60);
+ *
+ *     vec1.distanceY(vec2);
+ *     // => -10
+ *
+ * @param {Victor} vector The second vector
+ * @return {Number} Distance
+ * @api public
+ */
+Victor.prototype.distanceY = function (vec) {
+	return this.y - vec.y;
+};
+
+/**
+ * Same as `distanceY()` but always returns an absolute number
+ *
+ * ### Examples:
+ *     var vec1 = new Victor(100, 50);
+ *     var vec2 = new Victor(200, 60);
+ *
+ *     vec1.distanceY(vec2);
+ *     // => 10
+ *
+ * @param {Victor} vector The second vector
+ * @return {Number} Absolute distance
+ * @api public
+ */
+Victor.prototype.absDistanceY = function (vec) {
+	return Math.abs(this.distanceY(vec));
+};
+
+/**
+ * Calculates the euclidean distance between this vector and another
+ *
+ * ### Examples:
+ *     var vec1 = new Victor(100, 50);
+ *     var vec2 = new Victor(200, 60);
+ *
+ *     vec1.distance(vec2);
+ *     // => 100.4987562112089
+ *
+ * @param {Victor} vector The second vector
+ * @return {Number} Distance
+ * @api public
+ */
+Victor.prototype.distance = function (vec) {
+	return Math.sqrt(this.distanceSq(vec));
+};
+
+/**
+ * Calculates the squared euclidean distance between this vector and another
+ *
+ * ### Examples:
+ *     var vec1 = new Victor(100, 50);
+ *     var vec2 = new Victor(200, 60);
+ *
+ *     vec1.distanceSq(vec2);
+ *     // => 10100
+ *
+ * @param {Victor} vector The second vector
+ * @return {Number} Distance
+ * @api public
+ */
+Victor.prototype.distanceSq = function (vec) {
+	var dx = this.distanceX(vec),
+		dy = this.distanceY(vec);
+
+	return dx * dx + dy * dy;
+};
+
+/**
+ * Calculates the length or magnitude of the vector
+ *
+ * ### Examples:
+ *     var vec = new Victor(100, 50);
+ *
+ *     vec.length();
+ *     // => 111.80339887498948
+ *
+ * @return {Number} Length / Magnitude
+ * @api public
+ */
+Victor.prototype.length = function () {
+	return Math.sqrt(this.lengthSq());
+};
+
+/**
+ * Squared length / magnitude
+ *
+ * ### Examples:
+ *     var vec = new Victor(100, 50);
+ *
+ *     vec.lengthSq();
+ *     // => 12500
+ *
+ * @return {Number} Length / Magnitude
+ * @api public
+ */
+Victor.prototype.lengthSq = function () {
+	return this.x * this.x + this.y * this.y;
+};
+
+Victor.prototype.magnitude = Victor.prototype.length;
+
+/**
+ * Returns a true if vector is (0, 0)
+ *
+ * ### Examples:
+ *     var vec = new Victor(100, 50);
+ *     vec.zero();
+ *
+ *     // => true
+ *
+ * @return {Boolean}
+ * @api public
+ */
+Victor.prototype.isZero = function() {
+	return this.x === 0 && this.y === 0;
+};
+
+/**
+ * Returns a true if this vector is the same as another
+ *
+ * ### Examples:
+ *     var vec1 = new Victor(100, 50);
+ *     var vec2 = new Victor(100, 50);
+ *     vec1.isEqualTo(vec2);
+ *
+ *     // => true
+ *
+ * @return {Boolean}
+ * @api public
+ */
+Victor.prototype.isEqualTo = function(vec2) {
+	return this.x === vec2.x && this.y === vec2.y;
+};
+
+/**
+ * # Utility Methods
+ */
+
+/**
+ * Returns an string representation of the vector
+ *
+ * ### Examples:
+ *     var vec = new Victor(10, 20);
+ *
+ *     vec.toString();
+ *     // => x:10, y:20
+ *
+ * @return {String}
+ * @api public
+ */
+Victor.prototype.toString = function () {
+	return 'x:' + this.x + ', y:' + this.y;
+};
+
+/**
+ * Returns an array representation of the vector
+ *
+ * ### Examples:
+ *     var vec = new Victor(10, 20);
+ *
+ *     vec.toArray();
+ *     // => [10, 20]
+ *
+ * @return {Array}
+ * @api public
+ */
+Victor.prototype.toArray = function () {
+	return [ this.x, this.y ];
+};
+
+/**
+ * Returns an object representation of the vector
+ *
+ * ### Examples:
+ *     var vec = new Victor(10, 20);
+ *
+ *     vec.toObject();
+ *     // => { x: 10, y: 20 }
+ *
+ * @return {Object}
+ * @api public
+ */
+Victor.prototype.toObject = function () {
+	return { x: this.x, y: this.y };
+};
+
+
+var degrees = 180 / Math.PI;
+
+function random (min, max) {
+    return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
+function radian2degrees (rad) {
+	return rad * degrees;
+}
+
+function degrees2radian (deg) {
+	return deg / degrees;
+}
 
 },{}]},{},[1])(1)
 });
