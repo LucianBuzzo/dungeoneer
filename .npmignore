@@ -80,3 +80,11 @@ typings/
 .fusebox/
 
 # End of https://www.gitignore.io/api/node
+
+# Additional files we don't want in the final package
+.editorconfig
+.travis.yml
+CHANGELOG.md
+README.md
+test.js
+web

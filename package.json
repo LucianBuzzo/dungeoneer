@@ -1,6 +1,6 @@
 {
   "name": "dungeoneer",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "A procedural dungeon generator",
   "main": "lib/generator.js",
   "homepage": "https://github.com/LucianBuzzo/dungeoneer",
@@ -9,7 +9,8 @@
     "url": "git://github.com/LucianBuzzo/dungeoneer.git"
   },
   "scripts": {
-    "test": "node test.js",
+    "test": "npm run lint && node test.js",
+    "lint": "standard",
     "web": "browserify lib/generator.js -o web/bundle.js --standalone Dungeoneer -t babelify --presets es2015"
   },
   "keywords": [
@@ -28,6 +29,7 @@
     "victor": "^1.1.0"
   },
   "devDependencies": {
-    "babelify": "^7.3.0"
+    "babelify": "^7.3.0",
+    "standard": "^12.0.1"
   }
 }
