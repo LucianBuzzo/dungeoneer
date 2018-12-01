@@ -3,6 +3,7 @@
   "version": "1.1.2",
   "description": "A procedural dungeon generator",
   "main": "lib/generator.js",
+  "types": "./lib/dungeoneer.d.ts",
   "homepage": "https://github.com/LucianBuzzo/dungeoneer",
   "repository": {
     "type": "git",
