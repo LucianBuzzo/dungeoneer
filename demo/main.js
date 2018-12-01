@@ -1,13 +1,13 @@
 const dungeoneer = require('../lib/generator')
 const packageJSON = require('../package')
 
-var canvas = document.querySelector('canvas');
-var ctx = canvas.getContext('2d');
+var canvas = document.querySelector('canvas')
+var ctx = canvas.getContext('2d')
 
 ctx.imageSmoothingEnabled = false
 
-var create = function(width, height) {
-  var cellSize = 4;
+var create = function (width, height) {
+  var cellSize = 4
   var dungeon = dungeoneer.generate({
     width: width,
     height: height
