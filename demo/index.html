@@ -19,7 +19,7 @@
         image-rendering: pixelated;
       }
 
-      #dice-svg {
+      #dice-svg svg {
         display: block;
         width: 80px;
         margin-left: auto;
@@ -27,11 +27,11 @@
         cursor: pointer;
       }
 
-      #dice-svg.mousedown {
+      #dice-svg svg.mousedown {
         padding-top: 1px;
       }
 
-      #dice-svg:hover {
+      #dice-svg svg:hover {
         animation: wiggle 0.82s cubic-bezier(.36,.07,.19,.97) both;
       }
 
@@ -60,8 +60,8 @@
     <![endif]-->
     <canvas></canvas>
 
-    <svg version="1.1" id="dice-svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-       viewBox="0 0 496.158 496.158" style="enable-background:new 0 0 496.158 496.158;" xml:space="preserve">
+    <div id="dice-svg">
+    <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 496.158 496.158" style="enable-background:new 0 0 496.158 496.158;" xml:space="preserve">
     <path style="fill:#4ABC96;" d="M248.082,0.003C111.07,0.003,0,111.063,0,248.085c0,137.001,111.07,248.07,248.082,248.07
       c137.006,0,248.076-111.069,248.076-248.07C496.158,111.062,385.088,0.003,248.082,0.003z"/>
     <path style="fill:#E0E0E2;" d="M384.149,169.049c-4.687-8.149-9.8-9.907-16.064-13.437L262.15,106.106
@@ -105,6 +105,7 @@
         <ellipse transform="matrix(-0.2948 -0.9556 0.9556 -0.2948 -56.266 634.9529)" style="fill:#999999;" cx="206.16" cy="338.238" rx="15.369" ry="14.195"/>
     </g>
     </svg>
+    </div>
 
     <script src="./main.js"></script>
   </body>
