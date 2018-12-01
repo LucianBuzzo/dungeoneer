@@ -44,13 +44,13 @@ var create = function(width, height) {
   }
 }
 
-document.querySelector('#dice-svg').addEventListener('mousedown', function () {
-  document.getElementById('dice-svg').classList.add('mousedown')
+document.querySelector('#dice-svg svg').addEventListener('mousedown', function () {
+  document.querySelector('#dice-svg svg').classList.add('mousedown')
   console.log('mousedown')
 }, false)
 
-document.querySelector('#dice-svg').addEventListener('mouseup', function () {
-  document.getElementById('dice-svg').classList.remove('mousedown')
+document.querySelector('#dice-svg svg').addEventListener('mouseup', function () {
+  document.querySelector('#dice-svg svg').classList.remove('mousedown')
   create(51, 51)
 }, false)
 
