@@ -35,11 +35,6 @@ $ npm install --save dungeoneer
 
 ## Usage
 
-Require in the factory and then call the `generate` method,
-using an object containing a `width` and `height` attribute.
-The `width` and `height` attributes determine the size of the dungeon and should
-always be odd numbers.
-
 ```js
 const dungeoneer = require('dungeoneer')
 
@@ -49,27 +44,38 @@ const dungeon = dungeoneer.generate({
 })
 ```
 
-The `generate` method will return a two dimensional array of Tile objects
+The `generate` method will return a dungeon object. The shape of the dungeon
+object is defined below:
 
-```
-Tile {
-  type: 'wall',
-  neighbours: [
-    [Object], [Object], [Object], [Object], [Object]
-  ],
+```ts
+type Tile = {
+  // An array containing the tiles immediately surrounding this one.
+  neighbours: Tile[]
+
+  // An object containing the tiles immediately north, south, east, and west of this tile.
   nesw: {
-    north: [Object],
-    south: [Object],
-    east: [Object],
-    west: [Object]
-  }
+    north?: Tile;
+    east?: Tile;
+    south?: Tile;
+    west?: Tile;
+  };
+
+  // 'floor' and 'door' are passable terrain and a wall is impassable terrain.
+  type: 'wall' | 'floor' | 'door';
+}
+
+type Room = {
+  height: number;
+  width: number;
+  x: number;
+  y: number;
+}
+
+type Dungeon = {
+  rooms: Room[];
+  tiles: Array<Tile[]>;
 }
 ```
-
- - **type** - The tile type, can be one of 'wall', 'floor' or 'door'.
- - **neighbours** - An array containing the tiles immediately surrounding this one.
- - **nesw** - An object containing the tiles immediately north, south, east, and
-west of this tile.
 
 ## License
 

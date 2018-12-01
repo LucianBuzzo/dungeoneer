@@ -13,6 +13,8 @@ var create = function(width, height) {
     height: height
   })
 
+  console.log(dungeon)
+
   canvas.width = width * cellSize
   canvas.height = height * cellSize
 
