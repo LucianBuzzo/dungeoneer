@@ -3769,9 +3769,10 @@ module.exports = {
 },{"victor":"p334","underscore":"h15N","./room":"ay3z","./tile":"AZpQ"}],"EHrm":[function(require,module,exports) {
 module.exports = {
   "name": "dungeoneer",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "description": "A procedural dungeon generator",
   "main": "lib/generator.js",
+  "types": "./lib/dungeoneer.d.ts",
   "homepage": "https://github.com/LucianBuzzo/dungeoneer",
   "repository": {
     "type": "git",
@@ -3810,6 +3811,7 @@ var create = function create(width, height) {
     width: width,
     height: height
   });
+  console.log(dungeon);
   canvas.width = width * cellSize;
   canvas.height = height * cellSize;
   canvas.style.width = width * cellSize + 'px';
@@ -3852,4 +3854,4 @@ $version.innerText = "v".concat(packageJSON.version);
 $version.style = "\n  color: white;\n  position: absolute;\n  bottom: 16px;\n  left: 16px;\n  font-family: monospace;\n";
 document.body.appendChild($version);
 },{"../lib/generator":"1n3G","../package":"EHrm"}]},{},["epB2"], null)
-//# sourceMappingURL=main.bb564ba8.map
+//# sourceMappingURL=main.743b5b35.map
