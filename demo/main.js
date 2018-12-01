@@ -44,7 +44,13 @@ var create = function(width, height) {
   }
 }
 
-document.querySelector('button').addEventListener('click', function () {
+document.querySelector('#dice-svg').addEventListener('mousedown', function () {
+  document.getElementById('dice-svg').classList.add('mousedown')
+  console.log('mousedown')
+}, false)
+
+document.querySelector('#dice-svg').addEventListener('mouseup', function () {
+  document.getElementById('dice-svg').classList.remove('mousedown')
   create(51, 51)
 }, false)
 

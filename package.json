@@ -11,8 +11,8 @@
   "scripts": {
     "test": "node test.js",
     "lint": "standard",
-    "dev": "parcel ./web/index.html",
-    "build": "parcel build ./web/index.html"
+    "dev": "parcel ./demo/index.html",
+    "build": "parcel build ./demo/index.html"
   },
   "keywords": [
     "procedural",
