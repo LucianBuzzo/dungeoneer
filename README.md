@@ -40,13 +40,13 @@ using an object containing a `width` and `height` attribute.
 The `width` and `height` attributes determine the size of the dungeon and should
 always be odd numbers.
 
-```
-const dungeoneer = require('dungeoneer');
+```js
+const dungeoneer = require('dungeoneer')
 
 const dungeon = dungeoneer.generate({
   width: 21,
   height: 21
-});
+})
 ```
 
 The `generate` method will return a two dimensional array of Tile objects
