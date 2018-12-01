@@ -1,0 +1,112 @@
+<!doctype html>
+<html class="no-js" lang="">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>Dungeoneer</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <style>
+      html,
+      body {
+        background: black;
+      }
+
+      canvas {
+        margin: 100px auto 100px;
+        display: block;
+        image-rendering: pixelated;
+      }
+
+      #dice-svg {
+        display: block;
+        width: 80px;
+        margin-left: auto;
+        margin-right: auto;
+        cursor: pointer;
+      }
+
+      #dice-svg.mousedown {
+        padding-top: 1px;
+      }
+
+      #dice-svg:hover {
+        animation: wiggle 0.82s cubic-bezier(.36,.07,.19,.97) both;
+      }
+
+      @keyframes wiggle {
+        10%, 90% {
+          transform: rotate(-2deg);
+        }
+
+        20%, 80% {
+          transform: rotate(0deg);
+        }
+
+        30%, 50%, 70% {
+          transform: rotate(2deg);
+        }
+
+        40%, 60% {
+          transform: rotate(-2deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!--[if lte IE 9]>
+    <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience and security.</p>
+    <![endif]-->
+    <canvas></canvas>
+
+    <svg version="1.1" id="dice-svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+       viewBox="0 0 496.158 496.158" style="enable-background:new 0 0 496.158 496.158;" xml:space="preserve">
+    <path style="fill:#4ABC96;" d="M248.082,0.003C111.07,0.003,0,111.063,0,248.085c0,137.001,111.07,248.07,248.082,248.07
+      c137.006,0,248.076-111.069,248.076-248.07C496.158,111.062,385.088,0.003,248.082,0.003z"/>
+    <path style="fill:#E0E0E2;" d="M384.149,169.049c-4.687-8.149-9.8-9.907-16.064-13.437L262.15,106.106
+      c-7.717-3.603-20.225-3.603-27.939,0l-105.936,49.506c-8.31,4.702-13.423,8.962-16.619,14.715
+      c-3.196,5.752-4.048,12.57-4.936,22.791v130.686c0,9.517,7.173,13.343,14.386,17.233l109.092,48.828
+      c0.477,0,11.846,2.889,18.238,2.889c6.392,0,17.526-2.889,17.526-2.889l109.092-48.828c6.966-3.57,14.386-7.716,14.386-17.233
+      V193.119C389.209,183.111,388.639,176.855,384.149,169.049z"/>
+    <g>
+      <path style="fill:#FFFFFF;" d="M230.952,225.638l-104.488-46.767c-7.61,0-13.779,7.391-13.779,16.506v125.171
+        c0,9.115,6.001,12.765,13.779,16.506l104.488,46.767c7.61,0,13.779-7.391,13.779-16.506V250.856
+        C244.73,241.741,240.139,230.452,230.952,225.638z"/>
+      <path style="fill:#FFFFFF;" d="M369.695,178.871l-104.488,46.767c-8.036,4.813-13.779,16.103-13.779,25.218v116.459
+        c0,9.115,6.169,16.506,13.779,16.506l104.488-46.767c7.21-3.422,13.779-7.391,13.779-16.506V195.377
+        C383.474,186.262,377.305,178.871,369.695,178.871z"/>
+      <path style="fill:#FFFFFF;" d="M363.021,159.454l-101.465-47.417c-7.391-3.452-19.372-3.452-26.761,0L133.33,159.454
+        c-7.389,3.456-7.39,9.054,0,12.509l101.465,47.415c7.389,3.455,19.371,3.455,26.761,0l101.465-47.415
+        C370.41,168.508,370.41,162.909,363.021,159.454z"/>
+    </g>
+    <g>
+
+        <ellipse transform="matrix(-0.2638 -0.9646 0.9646 -0.2638 156.6149 737.5097)" style="fill:#999999;" cx="359.756" cy="308.987" rx="15.223" ry="14.341"/>
+
+        <ellipse transform="matrix(-0.2638 -0.9646 0.9646 -0.2638 129.3093 667.2164)" style="fill:#999999;" cx="319.278" cy="284.261" rx="15.223" ry="14.341"/>
+
+        <ellipse transform="matrix(-0.2638 -0.9646 0.9646 -0.2638 101.9889 596.9172)" style="fill:#999999;" cx="278.79" cy="259.538" rx="15.221" ry="14.342"/>
+      <ellipse style="fill:#999999;" cx="186.009" cy="160.099" rx="17.896" ry="10.653"/>
+      <ellipse style="fill:#999999;" cx="242.259" cy="135.809" rx="17.896" ry="10.653"/>
+      <ellipse style="fill:#999999;" cx="257.599" cy="192.699" rx="17.896" ry="10.653"/>
+      <ellipse style="fill:#999999;" cx="313.839" cy="168.409" rx="17.896" ry="10.653"/>
+      <ellipse style="fill:#999999;" cx="221.799" cy="176.719" rx="17.896" ry="10.653"/>
+      <ellipse style="fill:#999999;" cx="278.049" cy="152.429" rx="17.896" ry="10.653"/>
+
+        <ellipse transform="matrix(-0.2949 -0.9555 0.9555 -0.2949 -31.0227 429.57)" style="fill:#999999;" cx="142.981" cy="226.231" rx="15.369" ry="14.196"/>
+
+        <ellipse transform="matrix(-0.2949 -0.9555 0.9555 -0.2949 36.4825 529.0678)" style="fill:#999999;" cx="213.443" cy="251.074" rx="15.37" ry="14.196"/>
+
+        <ellipse transform="matrix(-0.2949 -0.9555 0.9555 -0.2949 -122.6878 534.9259)" style="fill:#999999;" cx="136.02" cy="312.729" rx="15.369" ry="14.196"/>
+
+        <ellipse transform="matrix(-0.2949 -0.9555 0.9555 -0.2949 -44.8175 531.011)" style="fill:#999999;" cx="173.51" cy="282.041" rx="15.37" ry="14.196"/>
+
+        <ellipse transform="matrix(-0.2948 -0.9556 0.9556 -0.2948 -56.266 634.9529)" style="fill:#999999;" cx="206.16" cy="338.238" rx="15.369" ry="14.195"/>
+    </g>
+    </svg>
+
+    <script src="./main.js"></script>
+  </body>
+</html>
+
