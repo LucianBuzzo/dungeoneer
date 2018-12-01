@@ -3769,7 +3769,7 @@ module.exports = {
 },{"victor":"p334","underscore":"h15N","./room":"ay3z","./tile":"AZpQ"}],"EHrm":[function(require,module,exports) {
 module.exports = {
   "name": "dungeoneer",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "A procedural dungeon generator",
   "main": "lib/generator.js",
   "homepage": "https://github.com/LucianBuzzo/dungeoneer",
