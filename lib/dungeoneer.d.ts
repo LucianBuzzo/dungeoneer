@@ -28,10 +28,10 @@ declare module 'dungeoneer' {
     tiles: Array<Tile[]>;
   }
 
-  function generate = (options: {
+  function build = (options: {
     width: number;
     height: number;
   }): Dungeon;
 
-  export = generate;
+  export = build;
 }

@@ -1,4 +1,4 @@
-const dungeoneer = require('../lib/generator')
+const dungeoneer = require('..')
 const packageJSON = require('../package')
 
 var canvas = document.querySelector('canvas')
@@ -8,7 +8,7 @@ ctx.imageSmoothingEnabled = false
 
 var create = function (width, height) {
   var cellSize = 4
-  var dungeon = dungeoneer.generate({
+  var dungeon = dungeoneer.build({
     width: width,
     height: height
   })

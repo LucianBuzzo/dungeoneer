@@ -38,13 +38,13 @@ $ npm install --save dungeoneer
 ```js
 const dungeoneer = require('dungeoneer')
 
-const dungeon = dungeoneer.generate({
+const dungeon = dungeoneer.build({
   width: 21,
   height: 21
 })
 ```
 
-The `generate` method will return a dungeon object. The shape of the dungeon
+The `build` method will return a dungeon object. The shape of the dungeon
 object is defined below:
 
 ```ts

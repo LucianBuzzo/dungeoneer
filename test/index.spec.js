@@ -1,8 +1,8 @@
 const ava = require('ava')
 const dungeoneer = require('..')
 
-ava.test('.generate() should return an object containing the key "tiles"', (test) => {
-  const dungeon = dungeoneer.generate({
+ava.test('.build() should return an object containing the key "tiles"', (test) => {
+  const dungeon = dungeoneer.build({
     width: 21,
     height: 21
   })
@@ -10,8 +10,8 @@ ava.test('.generate() should return an object containing the key "tiles"', (test
   test.true(dungeon.hasOwnProperty('tiles'))
 })
 
-ava.test('.generate() should return an object containing the key "rooms"', (test) => {
-  const dungeon = dungeoneer.generate({
+ava.test('.build() should return an object containing the key "rooms"', (test) => {
+  const dungeon = dungeoneer.build({
     width: 21,
     height: 21
   })
