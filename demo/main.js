@@ -13,7 +13,7 @@ var create = function(width, height) {
     height: height
   })
 
-  console.log(dungeon)
+  console.log('Generated dungeon', dungeon)
 
   canvas.width = width * cellSize
   canvas.height = height * cellSize
@@ -48,7 +48,6 @@ var create = function(width, height) {
 
 document.querySelector('#dice-svg svg').addEventListener('mousedown', function () {
   document.querySelector('#dice-svg svg').classList.add('mousedown')
-  console.log('mousedown')
 }, false)
 
 document.querySelector('#dice-svg svg').addEventListener('mouseup', function () {
