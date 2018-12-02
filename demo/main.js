@@ -32,18 +32,21 @@ var create = function (width, height) {
   })
 
   ctx.fillStyle = 'rgba(255, 255, 255, 0.5)'
-  for (var i = 0; i < dungeon.tiles.length; i++) {
-    for (var j = 0; j < dungeon.tiles.length; j++) {
-      if (dungeon.tiles[i][j].type === 'floor') {
+  for (var x = 0; x < dungeon.tiles.length; x++) {
+    for (var y = 0; y < dungeon.tiles.length; y++) {
+      if (dungeon.tiles[x][y].type === 'floor') {
         ctx.fillStyle = 'rgba(255, 255, 255, 0.5)'
-        ctx.fillRect(i * cellSize, j * cellSize, cellSize, cellSize)
+        ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize)
       }
-      if (dungeon.tiles[i][j].type === 'door') {
+      if (dungeon.tiles[x][y].type === 'door') {
         ctx.fillStyle = 'yellow'
-        ctx.fillRect(i * cellSize, j * cellSize, cellSize, cellSize)
+        ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize)
       }
     }
   }
+
+  window.ctx = ctx
+  window.dungeon = dungeon
 }
 
 document.querySelector('#dice-svg svg').addEventListener('mousedown', function () {

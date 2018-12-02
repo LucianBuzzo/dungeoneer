@@ -202,6 +202,28 @@ ava.test('.build() the tile on south east corner should have only three neighbou
   test.deepEqual(Object.keys(tile.neighbours), [ 'n', 'w', 'nw' ])
 })
 
+ava.test('.build() tiles should contain at least one floor tile', (test) => {
+  const width = 21
+  const height = 21
+  const dungeon = dungeoneer.build({
+    width,
+    height
+  })
+
+  const floorTiles = []
+
+  for (let x = 0; x < width; x++) {
+    for (let y = 0; y < height; y++) {
+      const tile = dungeon.tiles[x][y]
+      if (tile.type === 'floor') {
+        floorTiles.push(tile)
+      }
+    }
+  }
+
+  test.truthy(floorTiles.length)
+})
+
 ava.test('.build() every floor tile should be connected to a floor or door tile', (test) => {
   const width = 21
   const height = 21
@@ -243,5 +265,123 @@ ava.test('.build() every door tile should be connected to at least two floor til
         }).length >= 2)
       }
     }
+  }
+})
+
+ava.test('.build() every room should have numerical height, width, x, and y properties', (test) => {
+  const width = 21
+  const height = 21
+  const dungeon = dungeoneer.build({
+    width,
+    height
+  })
+
+  for (const room of dungeon.rooms) {
+    test.is(typeof room.height, 'number')
+    test.is(typeof room.width, 'number')
+    test.is(typeof room.x, 'number')
+    test.is(typeof room.y, 'number')
+  }
+})
+
+ava.test('.build() every room should fall within the bounds of the declared height and width', (test) => {
+  const width = 21
+  const height = 21
+  const dungeon = dungeoneer.build({
+    width,
+    height
+  })
+
+  for (const room of dungeon.rooms) {
+    test.true(room.width + room.x <= width)
+    test.true(room.height + room.y <= height)
+  }
+})
+
+ava.test('.build() every room should be surrounded by either wall or door tiles', (test) => {
+  const width = 21
+  const height = 21
+  const dungeon = dungeoneer.build({
+    width,
+    height
+  })
+
+  const tiles = []
+
+  for (const room of dungeon.rooms) {
+    const north = room.y - 1
+    const east = room.x + room.width
+    const south = room.y + room.height
+    const west = room.x - 1
+
+    for (let x = west; x < east + 1; x++) {
+      if (dungeon.tiles[x]) {
+        if (dungeon.tiles[x][north]) {
+          tiles.push(dungeon.tiles[x][north])
+        }
+
+        if (dungeon.tiles[x][south]) {
+          tiles.push(dungeon.tiles[x][south])
+        }
+      }
+    }
+
+    for (let y = north + 1; y < south; y++) {
+      if (dungeon.tiles[west]) {
+        tiles.push(dungeon.tiles[west][y])
+      }
+
+      if (dungeon.tiles[east]) {
+        tiles.push(dungeon.tiles[east][y])
+      }
+    }
+  }
+
+  for (const tile of tiles) {
+    test.true(tile.type === 'wall' || tile.type === 'door')
+  }
+})
+
+ava.test('.build() every room should have at least one adjacent door tile', (test) => {
+  const width = 21
+  const height = 21
+  const dungeon = dungeoneer.build({
+    width,
+    height
+  })
+
+  for (const room of dungeon.rooms) {
+    const tiles = []
+
+    const north = room.y - 1
+    const east = room.x + room.width
+    const south = room.y + room.height
+    const west = room.x - 1
+
+    for (let x = west; x < east + 1; x++) {
+      if (dungeon.tiles[x]) {
+        if (dungeon.tiles[x][north]) {
+          tiles.push(dungeon.tiles[x][north])
+        }
+
+        if (dungeon.tiles[x][south]) {
+          tiles.push(dungeon.tiles[x][south])
+        }
+      }
+    }
+
+    for (let y = north + 1; y < south; y++) {
+      if (dungeon.tiles[west]) {
+        tiles.push(dungeon.tiles[west][y])
+      }
+
+      if (dungeon.tiles[east]) {
+        tiles.push(dungeon.tiles[east][y])
+      }
+    }
+
+    test.truthy(tiles.find((tile) => {
+      return tile.type === 'door'
+    }))
   }
 })
