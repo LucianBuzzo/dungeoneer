@@ -3773,7 +3773,7 @@ module.exports = {
 },{"victor":"p334","underscore":"h15N","./room":"ay3z","./tile":"AZpQ"}],"EHrm":[function(require,module,exports) {
 module.exports = {
   "name": "dungeoneer",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "A procedural dungeon generator",
   "main": "lib/index.js",
   "types": "./lib/dungeoneer.d.ts",
@@ -3840,19 +3840,22 @@ var create = function create(width, height) {
   });
   ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
 
-  for (var i = 0; i < dungeon.tiles.length; i++) {
-    for (var j = 0; j < dungeon.tiles.length; j++) {
-      if (dungeon.tiles[i][j].type === 'floor') {
+  for (var x = 0; x < dungeon.tiles.length; x++) {
+    for (var y = 0; y < dungeon.tiles.length; y++) {
+      if (dungeon.tiles[x][y].type === 'floor') {
         ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-        ctx.fillRect(i * cellSize, j * cellSize, cellSize, cellSize);
+        ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
       }
 
-      if (dungeon.tiles[i][j].type === 'door') {
+      if (dungeon.tiles[x][y].type === 'door') {
         ctx.fillStyle = 'yellow';
-        ctx.fillRect(i * cellSize, j * cellSize, cellSize, cellSize);
+        ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
       }
     }
   }
+
+  window.ctx = ctx;
+  window.dungeon = dungeon;
 };
 
 document.querySelector('#dice-svg svg').addEventListener('mousedown', function () {
@@ -3868,4 +3871,4 @@ $version.innerText = "v".concat(packageJSON.version);
 $version.style = "\n  color: white;\n  position: absolute;\n  bottom: 16px;\n  left: 16px;\n  font-family: monospace;\n";
 document.body.appendChild($version);
 },{"..":"VNNP","../package":"EHrm"}]},{},["epB2"], null)
-//# sourceMappingURL=main.eac335a3.map
+//# sourceMappingURL=main.b52e90ee.map
