@@ -38,26 +38,27 @@ $ npm install --save dungeoneer
 ```js
 const dungeoneer = require('dungeoneer')
 
-const dungeon = dungeoneer.generate({
+const dungeon = dungeoneer.build({
   width: 21,
   height: 21
 })
 ```
 
-The `generate` method will return a dungeon object. The shape of the dungeon
+The `build` method will return a dungeon object. The shape of the dungeon
 object is defined below:
 
 ```ts
 type Tile = {
-  // An array containing the tiles immediately surrounding this one.
-  neighbours: Tile[]
-
-  // An object containing the tiles immediately north, south, east, and west of this tile.
+  // An object containing the tiles immediately surrounding this tile.
   nesw: {
-    north?: Tile;
-    east?: Tile;
-    south?: Tile;
-    west?: Tile;
+    n?: Tile;
+    ne?: Tile;
+    e?: Tile;
+    se?: Tile;
+    s?: Tile;
+    sw?: Tile;
+    w?: Tile;
+    nw?: Tile;
   };
 
   // 'floor' and 'door' are passable terrain and a wall is impassable terrain.

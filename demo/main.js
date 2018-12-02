@@ -1,19 +1,19 @@
-const dungeoneer = require('../lib/generator')
+const dungeoneer = require('..')
 const packageJSON = require('../package')
 
-var canvas = document.querySelector('canvas');
-var ctx = canvas.getContext('2d');
+var canvas = document.querySelector('canvas')
+var ctx = canvas.getContext('2d')
 
 ctx.imageSmoothingEnabled = false
 
-var create = function(width, height) {
-  var cellSize = 4;
-  var dungeon = dungeoneer.generate({
+var create = function (width, height) {
+  var cellSize = 4
+  var dungeon = dungeoneer.build({
     width: width,
     height: height
   })
 
-  console.log(dungeon)
+  console.log('Generated dungeon', dungeon)
 
   canvas.width = width * cellSize
   canvas.height = height * cellSize
@@ -48,7 +48,6 @@ var create = function(width, height) {
 
 document.querySelector('#dice-svg svg').addEventListener('mousedown', function () {
   document.querySelector('#dice-svg svg').classList.add('mousedown')
-  console.log('mousedown')
 }, false)
 
 document.querySelector('#dice-svg svg').addEventListener('mouseup', function () {

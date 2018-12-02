@@ -1,14 +1,15 @@
 declare module 'dungeoneer' {
   type Tile = {
-    // An array containing the tiles immediately surrounding this one.
-    neighbours: Tile[]
-
-    // An object containing the tiles immediately north, south, east, and west of this tile.
+    // An object containing the tiles immediately surrounding this tile.
     nesw: {
-      north?: Tile;
-      east?: Tile;
-      south?: Tile;
-      west?: Tile;
+      n?: Tile;
+      ne?: Tile;
+      e?: Tile;
+      se?: Tile;
+      s?: Tile;
+      sw?: Tile;
+      w?: Tile;
+      nw?: Tile;
     };
 
     // 'floor' and 'door' are passable terrain and a wall is impassable terrain.
@@ -27,10 +28,10 @@ declare module 'dungeoneer' {
     tiles: Array<Tile[]>;
   }
 
-  function generate = (options: {
+  function build = (options: {
     width: number;
     height: number;
   }): Dungeon;
 
-  export = generate;
+  export = build;
 }
