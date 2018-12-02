@@ -1,5 +1,6 @@
 const ava = require('ava')
 const dungeoneer = require('..')
+const helpers = require('./helpers')
 
 ava.test('.build() should return an object containing the key "tiles"', (test) => {
   const dungeon = dungeoneer.build({
@@ -266,6 +267,30 @@ ava.test('.build() every door tile should be connected to at least two floor til
       }
     }
   }
+})
+
+ava.test('.build() every floor and door tile should be accessible', (test) => {
+  const width = 15
+  const height = 15
+  const dungeon = dungeoneer.build({
+    width,
+    height
+  })
+
+  const visited = helpers.walkDungeon(dungeon)
+
+  for (let x = 0; x < width; x++) {
+    for (let y = 0; y < height; y++) {
+      const tile = dungeon.tiles[x][y]
+      if (tile.type === 'door' || tile.type === 'floor') {
+        if (!visited[tile.x][tile.y]) {
+          throw new Error(`Tile ${x}, ${y} was not visited`)
+        }
+      }
+    }
+  }
+
+  test.pass()
 })
 
 ava.test('.build() every room should have numerical height, width, x, and y properties', (test) => {
