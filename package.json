@@ -13,6 +13,7 @@
     "test": "nyc --reporter=lcov ava -v",
     "lint": "standard",
     "ci": "npm run lint && npm run test",
+    "mutate": "stryker run",
     "dev": "parcel ./demo/index.html",
     "build": "parcel build --public-url . --no-minify ./demo/index.html"
   },
@@ -35,7 +36,11 @@
     "ava": "^0.25.0",
     "nyc": "^13.1.0",
     "parcel-bundler": "^1.10.3",
-    "standard": "^12.0.1"
+    "standard": "^12.0.1",
+    "stryker": "^0.33.1",
+    "stryker-api": "^0.22.0",
+    "stryker-html-reporter": "^0.16.9",
+    "stryker-javascript-mutator": "^0.12.1"
   },
   "ava": {
     "files": [

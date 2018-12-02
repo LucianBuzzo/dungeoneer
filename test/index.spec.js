@@ -210,12 +210,6 @@ ava.test('.build() every floor tile should be connected to a floor or door tile'
     height
   })
 
-  const assert = (x, y) => {
-    if (x !== y) {
-      throw new Error(`${x} does not equal ${y}`)
-    }
-  }
-
   for (let x = 0; x < width; x++) {
     for (let y = 0; y < height; y++) {
       const tile = dungeon.tiles[x][y]
@@ -237,12 +231,6 @@ ava.test('.build() every door tile should be connected to at least two floor til
     width,
     height
   })
-
-  const assert = (x, y) => {
-    if (x !== y) {
-      throw new Error(`${x} does not equal ${y}`)
-    }
-  }
 
   for (let x = 0; x < width; x++) {
     for (let y = 0; y < height; y++) {
