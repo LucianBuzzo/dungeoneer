@@ -3138,7 +3138,7 @@ var define;
  * @param {Number} height - The height of the room
  */
 
-var Room = function Room(x, y, width, height) {
+const Room = function Room(x, y, width, height) {
   this.x = x;
   this.y = y;
   this.width = width;
@@ -3191,9 +3191,11 @@ module.exports = Room;
  * @param {String} type - The type of tile, e.g. 'wall', 'floor'
  */
 
-var Tile = function Tile(type) {
+const Tile = function Tile(type, x, y) {
   this.type = type;
   this.neighbours = [];
+  this.x = x;
+  this.y = y;
 };
 /**
  * @desc Sets an array containing this tiles immediate neighbours
@@ -3217,16 +3219,16 @@ module.exports = Tile;
  */
 'use strict';
 
-var Victor = require('victor');
+const Victor = require('victor');
 
-var _ = require('underscore');
+const _ = require('underscore');
 
-var Room = require('./room');
+const Room = require('./room');
 
-var Tile = require('./tile');
+const Tile = require('./tile');
 
-var getTileNESW = function getTileNESW(tile) {
-  var tiles = [];
+const getTileNESW = tile => {
+  const tiles = [];
 
   if (tile.neighbours.n) {
     tiles.push(tile.neighbours.n);
@@ -3276,7 +3278,7 @@ var getTileNESW = function getTileNESW(tile) {
  */
 
 
-var Dungeon = function Dungeon() {
+const Dungeon = function Dungeon() {
   var numRoomTries = 50; // The inverse chance of adding a connector between two regions that have
   // already been joined. Increasing this leads to more loosely connected
   // dungeons.
@@ -3290,18 +3292,18 @@ var Dungeon = function Dungeon() {
   var _currentRegion = -1;
 
   var stage;
-  var n = new Victor(0, 1);
-  var e = new Victor(1, 0);
-  var s = new Victor(0, -1);
-  var w = new Victor(-1, 0); // The four cardinal directions: north, south, east, and west.
+  const n = new Victor(0, 1);
+  const e = new Victor(1, 0);
+  const s = new Victor(0, -1);
+  const w = new Victor(-1, 0); // The four cardinal directions: north, south, east, and west.
 
-  var cardinalDirections = [n, e, s, w];
+  const cardinalDirections = [n, e, s, w];
 
-  var bindStage = function bindStage(givenStage) {
+  const bindStage = givenStage => {
     stage = givenStage;
   };
 
-  var _tiles = [];
+  let _tiles = [];
   /**
    * @desc returns a tile at the provided coordinates
    *
@@ -3311,7 +3313,7 @@ var Dungeon = function Dungeon() {
    * @returns {Object} - A Tile object
    */
 
-  var getTile = function getTile(x, y) {
+  const getTile = (x, y) => {
     return _tiles[x][y];
   };
   /**
@@ -3327,14 +3329,14 @@ var Dungeon = function Dungeon() {
    */
 
 
-  var setTile = function setTile(x, y, type) {
+  const setTile = (x, y, type) => {
     if (_tiles[x] && _tiles[x][y]) {
       _tiles[x][y].type = type;
       _tiles[x][y].region = _currentRegion;
       return _tiles[x][y];
     }
 
-    throw new RangeError("tile at ".concat(x, ", ").concat(y, " is unreachable"));
+    throw new RangeError(`tile at ${x}, ${y} is unreachable`);
   };
   /**
    * @desc Generates tile data to the dimension of the stage.
@@ -3345,8 +3347,8 @@ var Dungeon = function Dungeon() {
    */
 
 
-  var fill = function fill(type) {
-    var neighbours = {};
+  const fill = type => {
+    let neighbours = {};
     var x;
     var y;
 
@@ -3354,7 +3356,7 @@ var Dungeon = function Dungeon() {
       _tiles.push([]);
 
       for (y = 0; y < stage.height; y++) {
-        _tiles[x].push(new Tile(type));
+        _tiles[x].push(new Tile(type, x, y));
       }
     }
 
@@ -3410,7 +3412,7 @@ var Dungeon = function Dungeon() {
    */
 
 
-  var build = function build(stage) {
+  const build = stage => {
     if (stage.width % 2 === 0 || stage.height % 2 === 0) {
       throw new Error('The stage must be odd-sized.');
     }
@@ -3452,13 +3454,11 @@ var Dungeon = function Dungeon() {
    */
 
 
-  var _growMaze = function _growMaze(startX, startY) {
+  const _growMaze = (startX, startY) => {
     var cells = [];
     var lastDir;
 
-    if (Object.keys(_tiles[startX][startY].neighbours).filter(function (x) {
-      return x.type === 'floor';
-    }).length > 0) {
+    if (Object.keys(_tiles[startX][startY].neighbours).filter(x => x.type === 'floor').length > 0) {
       return;
     }
 
@@ -3467,7 +3467,7 @@ var Dungeon = function Dungeon() {
     _carve(startX, startY);
 
     cells.push(new Victor(startX, startY));
-    var count = 0;
+    let count = 0;
 
     while (cells.length && count < 500) {
       count++;
@@ -3475,11 +3475,9 @@ var Dungeon = function Dungeon() {
 
       var unmadeCells = [];
 
-      for (var _i = 0; _i < cardinalDirections.length; _i++) {
-        var _dir = cardinalDirections[_i];
-
-        if (_canCarve(cell, _dir)) {
-          unmadeCells.push(_dir);
+      for (let dir of cardinalDirections) {
+        if (_canCarve(cell, dir)) {
+          unmadeCells.push(dir);
         }
       }
 
@@ -3487,23 +3485,21 @@ var Dungeon = function Dungeon() {
         // Based on how "windy" passages are, try to prefer carving in the
         // same direction.
         var dir;
-        var stringifiedCells = unmadeCells.map(function (v) {
-          return v.toString();
-        });
+        var stringifiedCells = unmadeCells.map(v => v.toString());
 
         if (lastDir && stringifiedCells.indexOf(lastDir.toString()) > -1 && _.random(1, 100) > windingPercent) {
           dir = lastDir.clone();
         } else {
-          var rand = _.random(0, unmadeCells.length - 1);
+          let rand = _.random(0, unmadeCells.length - 1);
 
           dir = unmadeCells[rand].clone();
         }
 
-        var carveLoc1 = cell.clone().add(dir).toObject();
+        let carveLoc1 = cell.clone().add(dir).toObject();
 
         _carve(carveLoc1.x, carveLoc1.y);
 
-        var carveLoc2 = cell.clone().add(dir).add(dir).toObject();
+        let carveLoc2 = cell.clone().add(dir).add(dir).toObject();
 
         _carve(carveLoc2.x, carveLoc2.y);
 
@@ -3527,7 +3523,7 @@ var Dungeon = function Dungeon() {
    */
 
 
-  var _addRooms = function _addRooms() {
+  const _addRooms = () => {
     for (var i = 0; i < numRoomTries; i++) {
       // Pick a random room size. The funny math here does two things:
       // - It makes sure rooms are odd-sized to line up with maze.
@@ -3558,9 +3554,7 @@ var Dungeon = function Dungeon() {
       var room = new Room(x, y, width, height);
       var overlaps = false;
 
-      for (var _i2 = 0; _i2 < _rooms.length; _i2++) {
-        var other = _rooms[_i2];
-
+      for (var other of _rooms) {
         if (room.intersects(other)) {
           overlaps = true;
           break;
@@ -3591,7 +3585,7 @@ var Dungeon = function Dungeon() {
    */
 
 
-  var carveArea = function carveArea(x, y, width, height) {
+  const carveArea = (x, y, width, height) => {
     for (var i = x; i < x + width; i++) {
       for (var j = y; j < y + height; j++) {
         _carve(i, j);
@@ -3605,26 +3599,22 @@ var Dungeon = function Dungeon() {
    */
 
 
-  var _connectRegions = function _connectRegions() {
-    var regionConnections = {};
+  const _connectRegions = () => {
+    let regionConnections = {};
 
-    _tiles.forEach(function (row) {
-      row.forEach(function (tile) {
+    _tiles.forEach(row => {
+      row.forEach(tile => {
         if (tile.type === 'floor') {
           return;
         }
 
-        var tileRegions = _.unique(getTileNESW(tile).map(function (x) {
-          return x.region;
-        }).filter(function (x) {
-          return !_.isUndefined(x);
-        }));
+        let tileRegions = _.unique(getTileNESW(tile).map(x => x.region).filter(x => !_.isUndefined(x)));
 
         if (tileRegions.length <= 1) {
           return;
         }
 
-        var key = tileRegions.join('-');
+        let key = tileRegions.join('-');
 
         if (!regionConnections[key]) {
           regionConnections[key] = [];
@@ -3634,13 +3624,13 @@ var Dungeon = function Dungeon() {
       });
     });
 
-    _.each(regionConnections, function (connections) {
-      var index = _.random(0, connections.length - 1);
+    _.each(regionConnections, connections => {
+      let index = _.random(0, connections.length - 1);
 
       connections[index].type = 'door';
       connections.splice(index, 1); // Occasional open up additional connections
 
-      connections.forEach(function (conn) {
+      connections.forEach(conn => {
         if (_oneIn(extraConnectorChance)) {
           conn.type = 'door';
         }
@@ -3660,7 +3650,7 @@ var Dungeon = function Dungeon() {
    */
 
 
-  var _oneIn = function _oneIn(num) {
+  const _oneIn = num => {
     return _.random(1, num) === 1;
   };
   /**
@@ -3670,22 +3660,20 @@ var Dungeon = function Dungeon() {
    */
 
 
-  var _removeDeadEnds = function _removeDeadEnds() {
+  const _removeDeadEnds = () => {
     var done = false;
 
-    var cycle = function cycle() {
-      var done = true;
+    const cycle = () => {
+      let done = true;
 
-      _tiles.forEach(function (row) {
-        row.forEach(function (tile) {
+      _tiles.forEach(row => {
+        row.forEach(tile => {
           // If it only has one exit, it's a dead end --> fill it in!
           if (tile.type === 'wall') {
             return;
           }
 
-          if (getTileNESW(tile).filter(function (t) {
-            return t.type !== 'wall';
-          }).length <= 1) {
+          if (getTileNESW(tile).filter(t => t.type !== 'wall').length <= 1) {
             tile.type = 'wall';
             done = false;
           }
@@ -3713,9 +3701,9 @@ var Dungeon = function Dungeon() {
    */
 
 
-  var _canCarve = function _canCarve(cell, direction) {
+  const _canCarve = (cell, direction) => {
     // Must end in bounds.
-    var end = cell.clone().add(direction).add(direction).add(direction).toObject();
+    let end = cell.clone().add(direction).add(direction).add(direction).toObject();
 
     if (!_tiles[end.x] || !_tiles[end.x][end.y]) {
       return false;
@@ -3726,7 +3714,7 @@ var Dungeon = function Dungeon() {
     } // Destination must not be open.
 
 
-    var dest = cell.clone().add(direction).add(direction).toObject();
+    let dest = cell.clone().add(direction).add(direction).toObject();
     return getTile(dest.x, dest.y).type !== 'floor';
   };
   /**
@@ -3737,7 +3725,7 @@ var Dungeon = function Dungeon() {
    */
 
 
-  var _startRegion = function _startRegion() {
+  const _startRegion = () => {
     _currentRegion++;
     return _currentRegion;
   };
@@ -3753,27 +3741,26 @@ var Dungeon = function Dungeon() {
    */
 
 
-  var _carve = function _carve(x, y) {
-    var type = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'floor';
+  const _carve = (x, y, type = 'floor') => {
     setTile(x, y, type);
   };
 
   return {
-    build: build
+    build
   };
 };
 
-var build = function build(options) {
+const build = options => {
   return new Dungeon().build(options);
 };
 
 module.exports = {
-  build: build
+  build
 };
 },{"victor":"p334","underscore":"h15N","./room":"ay3z","./tile":"AZpQ"}],"EHrm":[function(require,module,exports) {
 module.exports = {
   "name": "dungeoneer",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "A procedural dungeon generator",
   "main": "lib/index.js",
   "types": "./lib/dungeoneer.d.ts",
@@ -3809,18 +3796,19 @@ module.exports = {
   },
   "ava": {
     "files": ["test/**/*.spec.js"]
-  }
+  },
+  "browserslist": ["last 2 Chrome versions"]
 };
 },{}],"epB2":[function(require,module,exports) {
-var dungeoneer = require('..');
+const dungeoneer = require('..');
 
-var packageJSON = require('../package');
+const packageJSON = require('../package');
 
 var canvas = document.querySelector('canvas');
 var ctx = canvas.getContext('2d');
 ctx.imageSmoothingEnabled = false;
 
-var create = function create(width, height) {
+var create = function (width, height) {
   var cellSize = 4;
   var dungeon = dungeoneer.build({
     width: width,
@@ -3834,7 +3822,7 @@ var create = function create(width, height) {
   ctx.fillStyle = 'black';
   ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
   ctx.fillStyle = 'red';
-  dungeon.rooms.forEach(function (room) {
+  dungeon.rooms.forEach(room => {
     ctx.fillStyle = 'red';
     ctx.fillRect(room.x * cellSize, room.y * cellSize, room.width * cellSize, room.height * cellSize);
   });
@@ -3866,9 +3854,15 @@ document.querySelector('#dice-svg svg').addEventListener('mouseup', function () 
   create(51, 51);
 }, false);
 create(51, 51);
-var $version = document.createElement('div');
-$version.innerText = "v".concat(packageJSON.version);
-$version.style = "\n  color: white;\n  position: absolute;\n  bottom: 16px;\n  left: 16px;\n  font-family: monospace;\n";
+const $version = document.createElement('div');
+$version.innerText = `v${packageJSON.version}`;
+$version.style = `
+  color: white;
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  font-family: monospace;
+`;
 document.body.appendChild($version);
 },{"..":"VNNP","../package":"EHrm"}]},{},["epB2"], null)
-//# sourceMappingURL=main.b52e90ee.map
+//# sourceMappingURL=main.e005d13e.map
