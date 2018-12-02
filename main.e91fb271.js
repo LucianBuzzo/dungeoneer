@@ -3210,7 +3210,7 @@ Tile.prototype.setNeighbours = function (neighbours) {
 };
 
 module.exports = Tile;
-},{}],"1n3G":[function(require,module,exports) {
+},{}],"VNNP":[function(require,module,exports) {
 /**
  * Based on Bob Nystrom's procedural dungeon generation logic that he wrote for Hauberk
  * http://journal.stuffwithstuff.com/2014/12/21/rooms-and-mazes/
@@ -3224,6 +3224,28 @@ var _ = require('underscore');
 var Room = require('./room');
 
 var Tile = require('./tile');
+
+var getTileNESW = function getTileNESW(tile) {
+  var tiles = [];
+
+  if (tile.neighbours.n) {
+    tiles.push(tile.neighbours.n);
+  }
+
+  if (tile.neighbours.e) {
+    tiles.push(tile.neighbours.e);
+  }
+
+  if (tile.neighbours.s) {
+    tiles.push(tile.neighbours.s);
+  }
+
+  if (tile.neighbours.w) {
+    tiles.push(tile.neighbours.w);
+  }
+
+  return tiles;
+};
 /**
  * @desc The random dungeon generator.
  *
@@ -3324,8 +3346,7 @@ var Dungeon = function Dungeon() {
 
 
   var fill = function fill(type) {
-    var neighbours = [];
-    var nesw = {};
+    var neighbours = {};
     var x;
     var y;
 
@@ -3339,48 +3360,41 @@ var Dungeon = function Dungeon() {
 
     for (x = 0; x < stage.width; x++) {
       for (y = 0; y < stage.height; y++) {
-        neighbours = [];
-        nesw = {};
+        neighbours = {};
 
         if (_tiles[x][y - 1]) {
-          neighbours.push(_tiles[x][y - 1]);
-          nesw.north = _tiles[x][y - 1];
+          neighbours.n = _tiles[x][y - 1];
         }
 
         if (_tiles[x + 1] && _tiles[x + 1][y - 1]) {
-          neighbours.push(_tiles[x + 1][y - 1]);
+          neighbours.ne = _tiles[x + 1][y - 1];
         }
 
         if (_tiles[x + 1] && _tiles[x + 1][y]) {
-          neighbours.push(_tiles[x + 1][y]);
-          nesw.east = _tiles[x + 1][y];
+          neighbours.e = _tiles[x + 1][y];
         }
 
         if (_tiles[x + 1] && _tiles[x + 1][y + 1]) {
-          neighbours.push(_tiles[x + 1][y + 1]);
+          neighbours.se = _tiles[x + 1][y + 1];
         }
 
         if (_tiles[x] && _tiles[x][y + 1]) {
-          neighbours.push(_tiles[x][y + 1]);
-          nesw.south = _tiles[x][y + 1];
+          neighbours.s = _tiles[x][y + 1];
         }
 
         if (_tiles[x - 1] && _tiles[x - 1][y + 1]) {
-          neighbours.push(_tiles[x - 1][y + 1]);
+          neighbours.sw = _tiles[x - 1][y + 1];
         }
 
         if (_tiles[x - 1] && _tiles[x - 1][y]) {
-          neighbours.push(_tiles[x - 1][y]);
-          nesw.west = _tiles[x - 1][y];
+          neighbours.w = _tiles[x - 1][y];
         }
 
         if (_tiles[x - 1] && _tiles[x - 1][y - 1]) {
-          neighbours.push(_tiles[x - 1][y - 1]);
+          neighbours.nw = _tiles[x - 1][y - 1];
         }
 
         _tiles[x][y].setNeighbours(neighbours);
-
-        _tiles[x][y].nesw = nesw;
       }
     }
 
@@ -3391,16 +3405,12 @@ var Dungeon = function Dungeon() {
    *
    * @param {Object} stage - An object with a width key and a height key. Used
    * to determine the size of the dungeon. Must be odd with and height.
-   * @param {Boolean} debug - outputs debug info if set to true
    *
    * @returns {Object} - Tile information for the dungeon
    */
 
 
-  var generate = function generate(stage) {
-    var debug = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-    var startDate = Date.now();
-
+  var build = function build(stage) {
     if (stage.width % 2 === 0 || stage.height % 2 === 0) {
       throw new Error('The stage must be odd-sized.');
     }
@@ -3426,12 +3436,6 @@ var Dungeon = function Dungeon() {
 
     _removeDeadEnds();
 
-    var endDate = Date.now();
-
-    if (debug) {
-      console.log('Dungeon generated in ' + (endDate - startDate) + 'ms');
-    }
-
     return {
       rooms: _rooms,
       tiles: _tiles
@@ -3452,7 +3456,7 @@ var Dungeon = function Dungeon() {
     var cells = [];
     var lastDir;
 
-    if (_tiles[startX][startY].neighbours.filter(function (x) {
+    if (Object.keys(_tiles[startX][startY].neighbours).filter(function (x) {
       return x.type === 'floor';
     }).length > 0) {
       return;
@@ -3610,7 +3614,7 @@ var Dungeon = function Dungeon() {
           return;
         }
 
-        var tileRegions = _.unique(_.values(tile.nesw).map(function (x) {
+        var tileRegions = _.unique(getTileNESW(tile).map(function (x) {
           return x.region;
         }).filter(function (x) {
           return !_.isUndefined(x);
@@ -3679,7 +3683,7 @@ var Dungeon = function Dungeon() {
             return;
           }
 
-          if (_.values(tile.nesw).filter(function (t) {
+          if (getTileNESW(tile).filter(function (t) {
             return t.type !== 'wall';
           }).length <= 1) {
             tile.type = 'wall';
@@ -3755,23 +3759,23 @@ var Dungeon = function Dungeon() {
   };
 
   return {
-    generate: generate
+    build: build
   };
 };
 
-var generate = function generate(options) {
-  return new Dungeon().generate(options);
+var build = function build(options) {
+  return new Dungeon().build(options);
 };
 
 module.exports = {
-  generate: generate
+  build: build
 };
 },{"victor":"p334","underscore":"h15N","./room":"ay3z","./tile":"AZpQ"}],"EHrm":[function(require,module,exports) {
 module.exports = {
   "name": "dungeoneer",
-  "version": "1.1.3",
+  "version": "2.0.0",
   "description": "A procedural dungeon generator",
-  "main": "lib/generator.js",
+  "main": "lib/index.js",
   "types": "./lib/dungeoneer.d.ts",
   "homepage": "https://github.com/LucianBuzzo/dungeoneer",
   "repository": {
@@ -3779,8 +3783,10 @@ module.exports = {
     "url": "git://github.com/LucianBuzzo/dungeoneer.git"
   },
   "scripts": {
-    "test": "node test.js",
+    "test": "nyc --reporter=lcov ava -v",
     "lint": "standard",
+    "ci": "npm run lint && npm run test",
+    "mutate": "stryker run",
     "dev": "parcel ./demo/index.html",
     "build": "parcel build --public-url . --no-minify ./demo/index.html"
   },
@@ -3792,12 +3798,21 @@ module.exports = {
     "victor": "^1.1.0"
   },
   "devDependencies": {
+    "ava": "^0.25.0",
+    "nyc": "^13.1.0",
     "parcel-bundler": "^1.10.3",
-    "standard": "^12.0.1"
+    "standard": "^12.0.1",
+    "stryker": "^0.33.1",
+    "stryker-api": "^0.22.0",
+    "stryker-html-reporter": "^0.16.9",
+    "stryker-javascript-mutator": "^0.12.1"
+  },
+  "ava": {
+    "files": ["test/**/*.spec.js"]
   }
 };
 },{}],"epB2":[function(require,module,exports) {
-var dungeoneer = require('../lib/generator');
+var dungeoneer = require('..');
 
 var packageJSON = require('../package');
 
@@ -3807,11 +3822,11 @@ ctx.imageSmoothingEnabled = false;
 
 var create = function create(width, height) {
   var cellSize = 4;
-  var dungeon = dungeoneer.generate({
+  var dungeon = dungeoneer.build({
     width: width,
     height: height
   });
-  console.log(dungeon);
+  console.log('Generated dungeon', dungeon);
   canvas.width = width * cellSize;
   canvas.height = height * cellSize;
   canvas.style.width = width * cellSize + 'px';
@@ -3842,7 +3857,6 @@ var create = function create(width, height) {
 
 document.querySelector('#dice-svg svg').addEventListener('mousedown', function () {
   document.querySelector('#dice-svg svg').classList.add('mousedown');
-  console.log('mousedown');
 }, false);
 document.querySelector('#dice-svg svg').addEventListener('mouseup', function () {
   document.querySelector('#dice-svg svg').classList.remove('mousedown');
@@ -3853,5 +3867,5 @@ var $version = document.createElement('div');
 $version.innerText = "v".concat(packageJSON.version);
 $version.style = "\n  color: white;\n  position: absolute;\n  bottom: 16px;\n  left: 16px;\n  font-family: monospace;\n";
 document.body.appendChild($version);
-},{"../lib/generator":"1n3G","../package":"EHrm"}]},{},["epB2"], null)
-//# sourceMappingURL=main.743b5b35.map
+},{"..":"VNNP","../package":"EHrm"}]},{},["epB2"], null)
+//# sourceMappingURL=main.eac335a3.map
