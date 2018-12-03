@@ -44,8 +44,12 @@ const dungeon = dungeoneer.build({
 })
 ```
 
-The `build` method will return a dungeon object. The shape of the dungeon
-object is defined below:
+The `build` method accepts `width` and `height` options that define the size of
+the dungeon, and will return a dungeon object. The smallest possible size for
+a dungeon is 5 x 5. Dungeons are always an odd size due to the way walls and
+floors are generated. If you supply even sized dimensions, they will be rounded
+up to the nearest odd number.
+The shape of the dungeon object is defined below:
 
 ```ts
 type Tile = {
