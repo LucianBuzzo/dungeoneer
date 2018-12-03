@@ -3413,8 +3413,20 @@ const Dungeon = function Dungeon() {
 
 
   const build = stage => {
-    if (stage.width % 2 === 0 || stage.height % 2 === 0) {
-      throw new Error('The stage must be odd-sized.');
+    if (stage.width < 5) {
+      throw new RangeError(`DungeoneerError: options.width must not be less than 5, received ${stage.width}`);
+    }
+
+    if (stage.height < 5) {
+      throw new RangeError(`DungeoneerError: options.height must not be less than 5, received ${stage.height}`);
+    }
+
+    if (stage.width % 2 === 0) {
+      stage.width += 1;
+    }
+
+    if (stage.height % 2 === 0) {
+      stage.height += 1;
     }
 
     bindStage(stage);
@@ -3538,17 +3550,21 @@ const Dungeon = function Dungeon() {
         width += rectangularity;
       } else {
         height += rectangularity;
-      }
+      } // Restrict the size of rooms relative to the stage size
 
+
+      width = Math.min(width, stage.width - 4);
+      height = Math.min(width, stage.height - 4);
       var x = _.random(0, Math.floor((stage.width - width) / 2)) * 2 + 1;
-      var y = _.random(0, Math.floor((stage.height - height) / 2)) * 2 + 1;
+      var y = _.random(0, Math.floor((stage.height - height) / 2)) * 2 + 1; // Make sure X dimension doesn't overflow
 
-      if (x > stage.width - width) {
-        x = stage.width - width - 1;
-      }
+      if (x + width > stage.width) {
+        x = Math.max(1, stage.width - width - 1);
+      } // Make sure Y dimension doesn't overflow
 
-      if (y > stage.height - height) {
-        y = stage.height - height - 1;
+
+      if (y + height > stage.height) {
+        y = Math.max(1, stage.height - height - 1);
       }
 
       var room = new Room(x, y, width, height);
@@ -3760,7 +3776,7 @@ module.exports = {
 },{"victor":"p334","underscore":"h15N","./room":"ay3z","./tile":"AZpQ"}],"EHrm":[function(require,module,exports) {
 module.exports = {
   "name": "dungeoneer",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "description": "A procedural dungeon generator",
   "main": "lib/index.js",
   "types": "./lib/dungeoneer.d.ts",
@@ -3804,6 +3820,8 @@ const dungeoneer = require('..');
 
 const packageJSON = require('../package');
 
+const WIDTH = 51;
+const HEIGHT = 51;
 var canvas = document.querySelector('canvas');
 var ctx = canvas.getContext('2d');
 ctx.imageSmoothingEnabled = false;
@@ -3844,6 +3862,17 @@ var create = function (width, height) {
 
   window.ctx = ctx;
   window.dungeon = dungeon;
+
+  window.border = () => {
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(cellSize * width, 0);
+    ctx.lineTo(cellSize * width, cellSize * height);
+    ctx.lineTo(0, cellSize * height);
+    ctx.lineTo(0, 0);
+    ctx.strokeStyle = 'white';
+    ctx.stroke();
+  };
 };
 
 document.querySelector('#dice-svg svg').addEventListener('mousedown', function () {
@@ -3851,9 +3880,10 @@ document.querySelector('#dice-svg svg').addEventListener('mousedown', function (
 }, false);
 document.querySelector('#dice-svg svg').addEventListener('mouseup', function () {
   document.querySelector('#dice-svg svg').classList.remove('mousedown');
-  create(51, 51);
+  create(WIDTH, HEIGHT);
 }, false);
-create(51, 51);
+create(WIDTH, HEIGHT);
+window.create = create;
 const $version = document.createElement('div');
 $version.innerText = `v${packageJSON.version}`;
 $version.style = `
@@ -3865,4 +3895,4 @@ $version.style = `
 `;
 document.body.appendChild($version);
 },{"..":"VNNP","../package":"EHrm"}]},{},["epB2"], null)
-//# sourceMappingURL=main.e005d13e.map
+//# sourceMappingURL=main.f5f9a19e.map
