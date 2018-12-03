@@ -1,6 +1,9 @@
 const dungeoneer = require('..')
 const packageJSON = require('../package')
 
+const WIDTH = 51
+const HEIGHT = 51
+
 var canvas = document.querySelector('canvas')
 var ctx = canvas.getContext('2d')
 
@@ -47,6 +50,17 @@ var create = function (width, height) {
 
   window.ctx = ctx
   window.dungeon = dungeon
+
+  window.border = () => {
+    ctx.beginPath()
+    ctx.moveTo(0, 0)
+    ctx.lineTo(cellSize * width, 0)
+    ctx.lineTo(cellSize * width, cellSize * height)
+    ctx.lineTo(0, cellSize * height)
+    ctx.lineTo(0, 0)
+    ctx.strokeStyle = 'white'
+    ctx.stroke()
+  }
 }
 
 document.querySelector('#dice-svg svg').addEventListener('mousedown', function () {
@@ -55,10 +69,12 @@ document.querySelector('#dice-svg svg').addEventListener('mousedown', function (
 
 document.querySelector('#dice-svg svg').addEventListener('mouseup', function () {
   document.querySelector('#dice-svg svg').classList.remove('mousedown')
-  create(51, 51)
+  create(WIDTH, HEIGHT)
 }, false)
 
-create(51, 51)
+create(WIDTH, HEIGHT)
+
+window.create = create
 
 const $version = document.createElement('div')
 $version.innerText = `v${packageJSON.version}`

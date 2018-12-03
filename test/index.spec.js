@@ -293,6 +293,46 @@ ava.test('.build() every floor and door tile should be accessible', (test) => {
   test.pass()
 })
 
+ava.test('.build() even numbers for options.width and options.height should be rounded up', (test) => {
+  const width = 20
+  const height = 20
+  const dungeon = dungeoneer.build({
+    width,
+    height
+  })
+
+  test.is(dungeon.tiles.length, width + 1)
+  test.is(dungeon.tiles[0].length, height + 1)
+})
+
+ava.test('.build() should throw an error if width is less than 5', (test) => {
+  const width = 4
+  const height = 20
+
+  const error = test.throws(() => {
+    dungeoneer.build({
+      width,
+      height
+    })
+  }, RangeError)
+
+  test.is(error.message, `DungeoneerError: options.width must not be less than 5, received ${width}`)
+})
+
+ava.test('.build() should throw an error if height is less than 5', (test) => {
+  const width = 20
+  const height = 4
+
+  const error = test.throws(() => {
+    dungeoneer.build({
+      width,
+      height
+    })
+  }, RangeError)
+
+  test.is(error.message, `DungeoneerError: options.height must not be less than 5, received ${height}`)
+})
+
 ava.test('.build() every room should have numerical height, width, x, and y properties', (test) => {
   const width = 21
   const height = 21
@@ -410,3 +450,20 @@ ava.test('.build() every room should have at least one adjacent door tile', (tes
     }))
   }
 })
+
+const sizes = [7, 21, 51, 101]
+
+for (const size of sizes) {
+  ava.test(`.build() Should reliably create ${size} x ${size} dungeons`, (test) => {
+    let count = 100
+
+    while (count--) {
+      dungeoneer.build({
+        width: 7,
+        height: 7
+      })
+    }
+
+    test.pass()
+  })
+}
