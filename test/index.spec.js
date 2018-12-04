@@ -2,6 +2,12 @@ const ava = require('ava')
 const dungeoneer = require('..')
 const helpers = require('./helpers')
 
+const assert = (x, y) => {
+  if (x !== y) {
+    throw new Error(`${x} does not equal ${y}`)
+  }
+}
+
 ava.test('.build() should return an object containing the key "tiles"', (test) => {
   const dungeon = dungeoneer.build({
     width: 21,
@@ -43,12 +49,6 @@ ava.test('.build() every tile should correctly reference its neighbours', (test)
     width,
     height
   })
-
-  const assert = (x, y) => {
-    if (x !== y) {
-      throw new Error(`${x} does not equal ${y}`)
-    }
-  }
 
   for (let x = 0; x < width; x++) {
     for (let y = 0; y < height; y++) {
@@ -451,16 +451,42 @@ ava.test('.build() every room should have at least one adjacent door tile', (tes
   }
 })
 
-const sizes = [7, 21, 51, 101]
+ava.test('.build() every room should be made up of an area of floor tiles', (test) => {
+  const width = 21
+  const height = 21
+  const dungeon = dungeoneer.build({
+    width,
+    height
+  })
 
-for (const size of sizes) {
-  ava.test(`.build() Should reliably create ${size} x ${size} dungeons`, (test) => {
+  for (const room of dungeon.rooms) {
+    for (let x = room.x; x < room.x + room.width; x++) {
+      for (let y = room.y; y < room.y + room.height; y++) {
+        const tile = dungeon.tiles[x][y]
+        assert(tile.type, 'floor')
+      }
+    }
+  }
+
+  test.pass()
+})
+
+const sizes = [
+  [5, 7],
+  [7, 7],
+  [21, 21],
+  [51, 51],
+  [101, 101]
+]
+
+for (const [width, height] of sizes) {
+  ava.test(`.build() Should reliably create ${width} x ${height} dungeons`, (test) => {
     let count = 100
 
     while (count--) {
       dungeoneer.build({
-        width: 7,
-        height: 7
+        width,
+        height
       })
     }
 
