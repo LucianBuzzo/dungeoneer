@@ -62,6 +62,9 @@ const create = function (width, height) {
     ctx.strokeStyle = 'white'
     ctx.stroke()
   }
+
+  const $seed = document.getElementById('seed')
+  $seed.innerText = dungeon.seed
 }
 
 document.querySelector('#dice-svg svg').addEventListener('mousedown', function () {

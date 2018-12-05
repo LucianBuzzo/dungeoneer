@@ -64,6 +64,8 @@ type Tile = {
     w?: Tile;
     nw?: Tile;
   };
+  x: number;
+  y: number;
 
   // 'floor' and 'door' are passable terrain and a wall is impassable terrain.
   type: 'wall' | 'floor' | 'door';
@@ -79,8 +81,24 @@ type Room = {
 type Dungeon = {
   rooms: Room[];
   tiles: Array<Tile[]>;
+  seed: string | number;
 }
 ```
+
+## Seeding
+
+A dungeon can be seeded using the `seed` option. A dungeon created with a seed
+and the same options can be repeatably created. Dungeons always return the seed
+they were created with.
+
+```js
+const dungeoneer = require('dungeoneer')
+
+const dungeon = dungeoneer.build({
+  width: 21,
+  height: 21,
+  seed: 'foobarbaz'
+})
 
 ## License
 

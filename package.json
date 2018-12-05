@@ -29,6 +29,7 @@
   "author": "Lucian Buzzo <lucian.buzzo@gmail.com>",
   "license": "MIT",
   "dependencies": {
+    "chance": "^1.0.18",
     "underscore": "^1.8.3",
     "victor": "^1.1.0"
   },
