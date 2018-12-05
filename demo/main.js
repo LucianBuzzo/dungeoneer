@@ -36,7 +36,7 @@ var create = function (width, height) {
 
   ctx.fillStyle = 'rgba(255, 255, 255, 0.5)'
   for (var x = 0; x < dungeon.tiles.length; x++) {
-    for (var y = 0; y < dungeon.tiles.length; y++) {
+    for (var y = 0; y < dungeon.tiles[x].length; y++) {
       if (dungeon.tiles[x][y].type === 'floor') {
         ctx.fillStyle = 'rgba(255, 255, 255, 0.5)'
         ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize)
