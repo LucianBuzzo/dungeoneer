@@ -3156,10 +3156,15 @@ const Room = function Room(x, y, width, height) {
 Room.prototype.getBoundingBox = function getBoundingBox() {
   return {
     top: this.y,
-    right: this.x + this.width,
-    bottom: this.y + this.height,
+    right: this.x + this.width - 1,
+    bottom: this.y + this.height - 1,
     left: this.x
   };
+};
+
+Room.prototype.containsTile = function containsPoint(x, y) {
+  const boundingBox = this.getBoundingBox();
+  return !(x < boundingBox.left || x > boundingBox.right || y < boundingBox.top || y > boundingBox.bottom);
 };
 /**
  * @desc Compares this room with an entity that has a bounding box method to see
@@ -3689,7 +3694,7 @@ const Dungeon = function Dungeon() {
             return;
           }
 
-          if (getTileNESW(tile).filter(t => t.type !== 'wall').length <= 1) {
+          if (getTileNESW(tile).filter(t => t.type !== 'wall').length <= 1 && !_rooms.find(room => room.containsTile(tile.x, tile.y))) {
             tile.type = 'wall';
             done = false;
           }
@@ -3776,7 +3781,7 @@ module.exports = {
 },{"victor":"p334","underscore":"h15N","./room":"ay3z","./tile":"AZpQ"}],"EHrm":[function(require,module,exports) {
 module.exports = {
   "name": "dungeoneer",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "description": "A procedural dungeon generator",
   "main": "lib/index.js",
   "types": "./lib/dungeoneer.d.ts",
@@ -3847,7 +3852,7 @@ var create = function (width, height) {
   ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
 
   for (var x = 0; x < dungeon.tiles.length; x++) {
-    for (var y = 0; y < dungeon.tiles.length; y++) {
+    for (var y = 0; y < dungeon.tiles[x].length; y++) {
       if (dungeon.tiles[x][y].type === 'floor') {
         ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
         ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
@@ -3895,4 +3900,4 @@ $version.style = `
 `;
 document.body.appendChild($version);
 },{"..":"VNNP","../package":"EHrm"}]},{},["epB2"], null)
-//# sourceMappingURL=main.f5f9a19e.map
+//# sourceMappingURL=main.65dfe337.map
