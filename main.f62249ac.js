@@ -3781,7 +3781,7 @@ module.exports = {
 },{"victor":"p334","underscore":"h15N","./room":"ay3z","./tile":"AZpQ"}],"EHrm":[function(require,module,exports) {
 module.exports = {
   "name": "dungeoneer",
-  "version": "2.0.4",
+  "version": "2.0.5",
   "description": "A procedural dungeon generator",
   "main": "lib/index.js",
   "types": "./lib/dungeoneer.d.ts",
@@ -3827,13 +3827,13 @@ const packageJSON = require('../package');
 
 const WIDTH = 51;
 const HEIGHT = 51;
-var canvas = document.querySelector('canvas');
-var ctx = canvas.getContext('2d');
+const canvas = document.querySelector('canvas');
+const ctx = canvas.getContext('2d');
 ctx.imageSmoothingEnabled = false;
 
-var create = function (width, height) {
-  var cellSize = 4;
-  var dungeon = dungeoneer.build({
+const create = function (width, height) {
+  const cellSize = 4;
+  const dungeon = dungeoneer.build({
     width: width,
     height: height
   });
@@ -3851,8 +3851,8 @@ var create = function (width, height) {
   });
   ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
 
-  for (var x = 0; x < dungeon.tiles.length; x++) {
-    for (var y = 0; y < dungeon.tiles[x].length; y++) {
+  for (let x = 0; x < dungeon.tiles.length; x++) {
+    for (let y = 0; y < dungeon.tiles[x].length; y++) {
       if (dungeon.tiles[x][y].type === 'floor') {
         ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
         ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
@@ -3900,4 +3900,4 @@ $version.style = `
 `;
 document.body.appendChild($version);
 },{"..":"VNNP","../package":"EHrm"}]},{},["epB2"], null)
-//# sourceMappingURL=main.65dfe337.map
+//# sourceMappingURL=main.a9cdd3df.map
