@@ -1,6 +1,6 @@
 {
   "name": "dungeoneer",
-  "version": "2.0.5",
+  "version": "2.1.0",
   "description": "A procedural dungeon generator",
   "main": "lib/index.js",
   "types": "./lib/dungeoneer.d.ts",
@@ -29,6 +29,7 @@
   "author": "Lucian Buzzo <lucian.buzzo@gmail.com>",
   "license": "MIT",
   "dependencies": {
+    "chance": "^1.0.18",
     "underscore": "^1.8.3",
     "victor": "^1.1.0"
   },

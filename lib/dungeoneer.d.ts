@@ -11,6 +11,8 @@ declare module 'dungeoneer' {
       w?: Tile;
       nw?: Tile;
     };
+    x: number;
+    y: number;
 
     // 'floor' and 'door' are passable terrain and a wall is impassable terrain.
     type: 'wall' | 'floor' | 'door';
@@ -26,11 +28,13 @@ declare module 'dungeoneer' {
   type Dungeon = {
     rooms: Room[];
     tiles: Array<Tile[]>;
+    seed: string | number;
   }
 
   function build = (options: {
     width: number;
     height: number;
+    seed?: string | number;
   }): Dungeon;
 
   export = build;

@@ -471,6 +471,68 @@ ava.test('.build() every room should be made up of an area of floor tiles', (tes
   test.pass()
 })
 
+ava.test('.build() should return a re-usable seed', (test) => {
+  const width = 21
+  const height = 21
+  const dungeon1 = dungeoneer.build({
+    width,
+    height
+  })
+
+  const dungeon2 = dungeoneer.build({
+    width,
+    height,
+    seed: dungeon1.seed
+  })
+
+  // TODO: Turn this into a "toArray" method
+  for (const dungeon of [ dungeon1, dungeon2 ]) {
+    for (let x = 0; x < width; x++) {
+      for (let y = 0; y < height; y++) {
+        const tile = dungeon.tiles[x][y]
+        dungeon.tiles[x][y] = {
+          x: tile.x,
+          y: tile.y,
+          type: tile.type
+        }
+      }
+    }
+  }
+
+  test.deepEqual(dungeon1, dungeon2)
+})
+
+ava.test('.build() should be seedable', (test) => {
+  const width = 21
+  const height = 21
+  const dungeon1 = dungeoneer.build({
+    width,
+    height,
+    seed: 'foobarbaz'
+  })
+
+  const dungeon2 = dungeoneer.build({
+    width,
+    height,
+    seed: 'foobarbaz'
+  })
+
+  for (const dungeon of [ dungeon1, dungeon2 ]) {
+    for (let x = 0; x < width; x++) {
+      for (let y = 0; y < height; y++) {
+        const tile = dungeon.tiles[x][y]
+        dungeon.tiles[x][y] = {
+          x: tile.x,
+          y: tile.y,
+          type: tile.type
+        }
+      }
+    }
+  }
+
+  test.deepEqual(dungeon1, dungeon2)
+})
+
 const sizes = [
   [5, 7],
   [7, 7],
