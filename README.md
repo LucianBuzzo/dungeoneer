@@ -99,6 +99,7 @@ const dungeon = dungeoneer.build({
   height: 21,
   seed: 'foobarbaz'
 })
+```
 
 ## License
 
