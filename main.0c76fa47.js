@@ -13408,7 +13408,7 @@ module.exports = {
 },{"chance":"9f80","victor":"p334","underscore":"h15N","./room":"ay3z","./tile":"AZpQ"}],"EHrm":[function(require,module,exports) {
 module.exports = {
   "name": "dungeoneer",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "A procedural dungeon generator",
   "main": "lib/index.js",
   "types": "./lib/dungeoneer.d.ts",
