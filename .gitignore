@@ -86,5 +86,6 @@ typings/
 .cache
 dist
 
-# Stryker reports
+# Stryker
+.stryker-tmp
 reports
