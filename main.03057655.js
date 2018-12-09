@@ -12795,6 +12795,21 @@ Room.prototype.intersects = function intersects(other) {
   var r2 = other.getBoundingBox();
   return !(r2.left > r1.right || r2.right < r1.left || r2.top > r1.bottom || r2.bottom < r1.top);
 };
+/**
+ * @desc Returns a simple POJO representing this room
+ *
+ * @returns {Object} - A POJO
+ */
+
+
+Room.prototype.toJS = function toJS() {
+  return {
+    x: this.x,
+    y: this.y,
+    width: this.width,
+    height: this.height
+  };
+};
 
 module.exports = Room;
 },{}],"AZpQ":[function(require,module,exports) {
@@ -12824,6 +12839,20 @@ const Tile = function Tile(type, x, y) {
 Tile.prototype.setNeighbours = function (neighbours) {
   this.neighbours = neighbours;
   return this;
+};
+/**
+ * @desc Returns a simple POJO representing this tile
+ *
+ * @returns {Object} - A POJO
+ */
+
+
+Tile.prototype.toJS = function toJS() {
+  return {
+    x: this.x,
+    y: this.y,
+    type: this.type
+  };
 };
 
 module.exports = Tile;
@@ -12923,6 +12952,8 @@ const Dungeon = function Dungeon() {
   };
 
   let _tiles = [];
+
+  let _seed;
 
   const randBetween = (min, max) => {
     return rng.integer({
@@ -13062,6 +13093,7 @@ const Dungeon = function Dungeon() {
       length: 7
     })}`;
     rng = new Chance(seed);
+    _seed = seed;
     bindStage(stage);
     fill('wall');
 
@@ -13086,7 +13118,34 @@ const Dungeon = function Dungeon() {
     return {
       rooms: _rooms,
       tiles: _tiles,
-      seed
+      seed,
+      toJS: _toJS
+    };
+  };
+
+  const _toJS = () => {
+    const rooms = [];
+    const tiles = [];
+
+    for (const room of _rooms) {
+      rooms.push(room.toJS());
+    }
+
+    for (let x = 0; x < _tiles.length; x++) {
+      if (!tiles[x]) {
+        tiles.push([]);
+      }
+
+      for (let y = 0; y < _tiles[x].length; y++) {
+        const tile = _tiles[x][y];
+        tiles[x].push(tile.toJS());
+      }
+    }
+
+    return {
+      tiles,
+      rooms,
+      seed: _seed
     };
   };
   /**
@@ -13408,7 +13467,7 @@ module.exports = {
 },{"chance":"9f80","victor":"p334","underscore":"h15N","./room":"ay3z","./tile":"AZpQ"}],"EHrm":[function(require,module,exports) {
 module.exports = {
   "name": "dungeoneer",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "A procedural dungeon generator",
   "main": "lib/index.js",
   "types": "./lib/dungeoneer.d.ts",
@@ -13531,4 +13590,4 @@ $version.style = `
 `;
 document.body.appendChild($version);
 },{"..":"VNNP","../package":"EHrm"}]},{},["epB2"], null)
-//# sourceMappingURL=main.1c33b4e3.map
+//# sourceMappingURL=main.61b48b2b.map
