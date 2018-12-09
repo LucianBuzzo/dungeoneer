@@ -1,6 +1,7 @@
 const ava = require('ava')
 const dungeoneer = require('..')
 const helpers = require('./helpers')
+const foobarbazDungeon = require('./fixtures/dungeon.foobarbaz.json')
 
 const assert = (x, y) => {
   if (x !== y) {
@@ -485,21 +486,19 @@ ava.test('.build() should return a re-usable seed', (test) => {
     seed: dungeon1.seed
   })
 
-  // TODO: Turn this into a "toArray" method
-  for (const dungeon of [ dungeon1, dungeon2 ]) {
-    for (let x = 0; x < width; x++) {
-      for (let y = 0; y < height; y++) {
-        const tile = dungeon.tiles[x][y]
-        dungeon.tiles[x][y] = {
-          x: tile.x,
-          y: tile.y,
-          type: tile.type
-        }
-      }
-    }
-  }
+  test.deepEqual(dungeon1.toJS(), dungeon2.toJS())
+})
 
-  test.deepEqual(dungeon1, dungeon2)
+ava.test('.build() seeded dungeons should be consisten', (test) => {
+  const width = 21
+  const height = 21
+  const dungeon = dungeoneer.build({
+    width,
+    height,
+    seed: 'foobarbaz'
+  })
+
+  test.deepEqual(dungeon.toJS(), foobarbazDungeon)
 })
 
 ava.test('.build() should be seedable', (test) => {
@@ -517,20 +516,25 @@ ava.test('.build() should be seedable', (test) => {
     seed: 'foobarbaz'
   })
 
-  for (const dungeon of [ dungeon1, dungeon2 ]) {
-    for (let x = 0; x < width; x++) {
-      for (let y = 0; y < height; y++) {
-        const tile = dungeon.tiles[x][y]
-        dungeon.tiles[x][y] = {
-          x: tile.x,
-          y: tile.y,
-          type: tile.type
-        }
-      }
-    }
-  }
+  test.deepEqual(dungeon1.toJS(), dungeon2.toJS())
+})
 
-  test.deepEqual(dungeon1, dungeon2)
+ava.test('.build() should throw an error if width is less than 5', (test) => {
+  test.throws(() => {
+    dungeoneer.build({
+      width: 3,
+      height: 10
+    })
+  })
+})
+
+ava.test('.build() should throw an error if height is less than 5', (test) => {
+  test.throws(() => {
+    dungeoneer.build({
+      width: 10,
+      height: 3
+    })
+  })
 })
 
 const sizes = [
@@ -543,7 +547,7 @@ const sizes = [
 
 for (const [width, height] of sizes) {
   ava.test(`.build() Should reliably create ${width} x ${height} dungeons`, (test) => {
-    let count = 100
+    let count = 10
 
     while (count--) {
       dungeoneer.build({
