@@ -533,6 +533,24 @@ ava.test('.build() should be seedable', (test) => {
   test.deepEqual(dungeon1, dungeon2)
 })
 
+ava.test('.build() should throw an error if width is less than 5', (test) => {
+  test.throws(() => {
+    dungeoneer.build({
+      width: 3,
+      height: 10
+    })
+  })
+})
+
+ava.test('.build() should throw an error if height is less than 5', (test) => {
+  test.throws(() => {
+    dungeoneer.build({
+      width: 10,
+      height: 3
+    })
+  })
+})
+
 const sizes = [
   [5, 7],
   [7, 7],
@@ -543,7 +561,7 @@ const sizes = [
 
 for (const [width, height] of sizes) {
   ava.test(`.build() Should reliably create ${width} x ${height} dungeons`, (test) => {
-    let count = 100
+    let count = 10
 
     while (count--) {
       dungeoneer.build({
