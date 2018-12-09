@@ -115,3 +115,12 @@ ava.test('Room.getBoundingBox() returns the correct bounding box', (test) => {
     left: 3
   })
 })
+
+ava.test('Room.toJS() should return a POJO', (test) => {
+  test.deepEqual(new Room(0, 0, 10, 10).toJS(), {
+    x: 0,
+    y: 0,
+    width: 10,
+    height: 10
+  })
+})
