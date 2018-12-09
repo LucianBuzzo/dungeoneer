@@ -10,12 +10,13 @@ module.exports = (configuration) => {
       command: './node_modules/.bin/ava --fail-fast'
     },
     transpilers: [],
-    logLevel: 'debug',
+    // logLevel: 'debug',
     coverageAnalysis: 'off',
     files: [
       'package.json',
       'lib/*.js',
-      'test/*.js'
+      'test/**/*.js',
+      'test/**/*.json'
     ],
     mutate: [ 'lib/*.js' ]
   })

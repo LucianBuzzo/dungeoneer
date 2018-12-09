@@ -1,6 +1,6 @@
 {
   "name": "dungeoneer",
-  "version": "2.1.2",
+  "version": "2.1.3",
   "description": "A procedural dungeon generator",
   "main": "lib/index.js",
   "types": "./lib/dungeoneer.d.ts",
