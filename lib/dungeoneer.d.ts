@@ -1,7 +1,7 @@
 declare module "dungeoneer" {
   type PlainTile = {
     // An object containing the tiles immediately surrounding this tile.
-    nesw: {
+    neighbours: {
       n?: Tile;
       ne?: Tile;
       e?: Tile;
