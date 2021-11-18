@@ -81,6 +81,8 @@ typings/
 
 # End of https://www.gitignore.io/api/node
 
+# Since this is a package intended to be installed elsewhere, the lock file should be ignored
+package-lock.json
 
 # Parcel build files
 .cache
