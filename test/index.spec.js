@@ -15,7 +15,7 @@ ava('.build() should return an object containing the key "tiles"', (test) => {
     height: 21
   })
 
-  test.true(dungeon.hasOwnProperty('tiles'))
+  test.truthy(dungeon.tiles)
 })
 
 ava('.build() should return an object containing the key "rooms"', (test) => {
@@ -24,7 +24,7 @@ ava('.build() should return an object containing the key "rooms"', (test) => {
     height: 21
   })
 
-  test.true(dungeon.hasOwnProperty('rooms'))
+  test.truthy(dungeon.rooms)
 })
 
 ava('.build() should return a 2d array of tiles proportional to the width and height options', (test) => {
@@ -103,7 +103,7 @@ ava('.build() tiles on the north edge should not list a northern neighbour', (te
   for (let x = 0; x < width; x++) {
     const tile = dungeon.tiles[x][0]
 
-    test.false(tile.neighbours.hasOwnProperty('n'))
+    test.falsy(tile.neighbours.n)
   }
 })
 
@@ -118,7 +118,7 @@ ava('.build() tiles on the east edge should not list an eastern neighbour', (tes
   for (let y = 0; y < height; y++) {
     const tile = dungeon.tiles[width - 1][y]
 
-    test.false(tile.neighbours.hasOwnProperty('e'))
+    test.falsy(tile.neighbours.e)
   }
 })
 
@@ -133,7 +133,7 @@ ava('.build() tiles on the south edge should not list a southern neighbour', (te
   for (let x = 0; x < width; x++) {
     const tile = dungeon.tiles[x][height - 1]
 
-    test.false(tile.neighbours.hasOwnProperty('s'))
+    test.false(tile.neighbours.s)
   }
 })
 
@@ -148,7 +148,7 @@ ava('.build() tiles on the west edge should not list a western neighbour', (test
   for (let y = 0; y < height; y++) {
     const tile = dungeon.tiles[0][y]
 
-    test.false(tile.neighbours.hasOwnProperty('w'))
+    test.falsy(tile.neighbours.w)
   }
 })
 
@@ -162,7 +162,7 @@ ava('.build() the tile on north west corner should have only three neighbours', 
 
   const tile = dungeon.tiles[0][0]
 
-  test.deepEqual(Object.keys(tile.neighbours), [ 'e', 'se', 's' ])
+  test.deepEqual(Object.keys(tile.neighbours), ['e', 'se', 's'])
 })
 
 ava('.build() the tile on north east corner should have only three neighbours', (test) => {
@@ -175,7 +175,7 @@ ava('.build() the tile on north east corner should have only three neighbours', 
 
   const tile = dungeon.tiles[width - 1][0]
 
-  test.deepEqual(Object.keys(tile.neighbours), [ 's', 'sw', 'w' ])
+  test.deepEqual(Object.keys(tile.neighbours), ['s', 'sw', 'w'])
 })
 
 ava('.build() the tile on south west corner should have only three neighbours', (test) => {
@@ -188,7 +188,7 @@ ava('.build() the tile on south west corner should have only three neighbours', 
 
   const tile = dungeon.tiles[0][height - 1]
 
-  test.deepEqual(Object.keys(tile.neighbours), [ 'n', 'ne', 'e' ])
+  test.deepEqual(Object.keys(tile.neighbours), ['n', 'ne', 'e'])
 })
 
 ava('.build() the tile on south east corner should have only three neighbours', (test) => {
@@ -201,7 +201,7 @@ ava('.build() the tile on south east corner should have only three neighbours', 
 
   const tile = dungeon.tiles[width - 1][height - 1]
 
-  test.deepEqual(Object.keys(tile.neighbours), [ 'n', 'w', 'nw' ])
+  test.deepEqual(Object.keys(tile.neighbours), ['n', 'w', 'nw'])
 })
 
 ava('.build() tiles should contain at least one floor tile', (test) => {

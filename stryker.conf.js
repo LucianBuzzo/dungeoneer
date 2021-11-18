@@ -3,7 +3,7 @@ module.exports = (configuration) => {
   configuration.set({
     mutator: 'javascript',
     packageManager: 'npm',
-    reporters: [ 'html', 'clear-text', 'progress' ],
+    reporters: ['html', 'clear-text', 'progress'],
     testRunner: 'command',
     timeoutMS: 100000,
     commandRunner: {
@@ -18,6 +18,6 @@ module.exports = (configuration) => {
       'test/**/*.js',
       'test/**/*.json'
     ],
-    mutate: [ 'lib/*.js' ]
+    mutate: ['lib/*.js']
   })
 }

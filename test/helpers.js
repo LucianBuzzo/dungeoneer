@@ -2,12 +2,12 @@ exports.walkDungeon = (dungeon) => {
   let start
   const visited = []
 
-  for (var x = 0; x < dungeon.tiles.length; x++) {
+  for (let x = 0; x < dungeon.tiles.length; x++) {
     if (!visited[x]) {
       visited[x] = []
     }
 
-    for (var y = 0; y < dungeon.tiles[x].length; y++) {
+    for (let y = 0; y < dungeon.tiles[x].length; y++) {
       visited[x].push(false)
 
       if (!start && match(dungeon.tiles[x][y])) {
