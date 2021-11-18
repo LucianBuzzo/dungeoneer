@@ -9,7 +9,7 @@ const assert = (x, y) => {
   }
 }
 
-ava.test('.build() should return an object containing the key "tiles"', (test) => {
+ava('.build() should return an object containing the key "tiles"', (test) => {
   const dungeon = dungeoneer.build({
     width: 21,
     height: 21
@@ -18,7 +18,7 @@ ava.test('.build() should return an object containing the key "tiles"', (test) =
   test.true(dungeon.hasOwnProperty('tiles'))
 })
 
-ava.test('.build() should return an object containing the key "rooms"', (test) => {
+ava('.build() should return an object containing the key "rooms"', (test) => {
   const dungeon = dungeoneer.build({
     width: 21,
     height: 21
@@ -27,7 +27,7 @@ ava.test('.build() should return an object containing the key "rooms"', (test) =
   test.true(dungeon.hasOwnProperty('rooms'))
 })
 
-ava.test('.build() should return a 2d array of tiles proportional to the width and height options', (test) => {
+ava('.build() should return a 2d array of tiles proportional to the width and height options', (test) => {
   const width = 21
   const height = 31
 
@@ -43,7 +43,7 @@ ava.test('.build() should return a 2d array of tiles proportional to the width a
   }
 })
 
-ava.test('.build() every tile should correctly reference its neighbours', (test) => {
+ava('.build() every tile should correctly reference its neighbours', (test) => {
   const width = 21
   const height = 21
   const dungeon = dungeoneer.build({
@@ -92,7 +92,7 @@ ava.test('.build() every tile should correctly reference its neighbours', (test)
   test.pass()
 })
 
-ava.test('.build() tiles on the north edge should not list a northern neighbour', (test) => {
+ava('.build() tiles on the north edge should not list a northern neighbour', (test) => {
   const width = 21
   const height = 21
   const dungeon = dungeoneer.build({
@@ -107,7 +107,7 @@ ava.test('.build() tiles on the north edge should not list a northern neighbour'
   }
 })
 
-ava.test('.build() tiles on the east edge should not list an eastern neighbour', (test) => {
+ava('.build() tiles on the east edge should not list an eastern neighbour', (test) => {
   const width = 21
   const height = 21
   const dungeon = dungeoneer.build({
@@ -122,7 +122,7 @@ ava.test('.build() tiles on the east edge should not list an eastern neighbour',
   }
 })
 
-ava.test('.build() tiles on the south edge should not list a southern neighbour', (test) => {
+ava('.build() tiles on the south edge should not list a southern neighbour', (test) => {
   const width = 21
   const height = 21
   const dungeon = dungeoneer.build({
@@ -137,7 +137,7 @@ ava.test('.build() tiles on the south edge should not list a southern neighbour'
   }
 })
 
-ava.test('.build() tiles on the west edge should not list a western neighbour', (test) => {
+ava('.build() tiles on the west edge should not list a western neighbour', (test) => {
   const width = 21
   const height = 21
   const dungeon = dungeoneer.build({
@@ -152,7 +152,7 @@ ava.test('.build() tiles on the west edge should not list a western neighbour', 
   }
 })
 
-ava.test('.build() the tile on north west corner should have only three neighbours', (test) => {
+ava('.build() the tile on north west corner should have only three neighbours', (test) => {
   const width = 21
   const height = 21
   const dungeon = dungeoneer.build({
@@ -165,7 +165,7 @@ ava.test('.build() the tile on north west corner should have only three neighbou
   test.deepEqual(Object.keys(tile.neighbours), [ 'e', 'se', 's' ])
 })
 
-ava.test('.build() the tile on north east corner should have only three neighbours', (test) => {
+ava('.build() the tile on north east corner should have only three neighbours', (test) => {
   const width = 21
   const height = 21
   const dungeon = dungeoneer.build({
@@ -178,7 +178,7 @@ ava.test('.build() the tile on north east corner should have only three neighbou
   test.deepEqual(Object.keys(tile.neighbours), [ 's', 'sw', 'w' ])
 })
 
-ava.test('.build() the tile on south west corner should have only three neighbours', (test) => {
+ava('.build() the tile on south west corner should have only three neighbours', (test) => {
   const width = 21
   const height = 21
   const dungeon = dungeoneer.build({
@@ -191,7 +191,7 @@ ava.test('.build() the tile on south west corner should have only three neighbou
   test.deepEqual(Object.keys(tile.neighbours), [ 'n', 'ne', 'e' ])
 })
 
-ava.test('.build() the tile on south east corner should have only three neighbours', (test) => {
+ava('.build() the tile on south east corner should have only three neighbours', (test) => {
   const width = 21
   const height = 21
   const dungeon = dungeoneer.build({
@@ -204,7 +204,7 @@ ava.test('.build() the tile on south east corner should have only three neighbou
   test.deepEqual(Object.keys(tile.neighbours), [ 'n', 'w', 'nw' ])
 })
 
-ava.test('.build() tiles should contain at least one floor tile', (test) => {
+ava('.build() tiles should contain at least one floor tile', (test) => {
   const width = 21
   const height = 21
   const dungeon = dungeoneer.build({
@@ -226,7 +226,7 @@ ava.test('.build() tiles should contain at least one floor tile', (test) => {
   test.truthy(floorTiles.length)
 })
 
-ava.test('.build() every floor tile should be connected to a floor or door tile', (test) => {
+ava('.build() every floor tile should be connected to a floor or door tile', (test) => {
   const width = 21
   const height = 21
   const dungeon = dungeoneer.build({
@@ -248,7 +248,7 @@ ava.test('.build() every floor tile should be connected to a floor or door tile'
   }
 })
 
-ava.test('.build() every door tile should be connected to at least two floor tiles', (test) => {
+ava('.build() every door tile should be connected to at least two floor tiles', (test) => {
   const width = 21
   const height = 21
   const dungeon = dungeoneer.build({
@@ -270,7 +270,7 @@ ava.test('.build() every door tile should be connected to at least two floor til
   }
 })
 
-ava.test('.build() every floor and door tile should be accessible', (test) => {
+ava('.build() every floor and door tile should be accessible', (test) => {
   const width = 15
   const height = 15
   const dungeon = dungeoneer.build({
@@ -294,7 +294,7 @@ ava.test('.build() every floor and door tile should be accessible', (test) => {
   test.pass()
 })
 
-ava.test('.build() even numbers for options.width and options.height should be rounded up', (test) => {
+ava('.build() even numbers for options.width and options.height should be rounded up', (test) => {
   const width = 20
   const height = 20
   const dungeon = dungeoneer.build({
@@ -306,7 +306,7 @@ ava.test('.build() even numbers for options.width and options.height should be r
   test.is(dungeon.tiles[0].length, height + 1)
 })
 
-ava.test('.build() should throw an error if width is less than 5', (test) => {
+ava('.build() should throw an error if width is less than 5', (test) => {
   const width = 4
   const height = 20
 
@@ -315,12 +315,12 @@ ava.test('.build() should throw an error if width is less than 5', (test) => {
       width,
       height
     })
-  }, RangeError)
+  })
 
   test.is(error.message, `DungeoneerError: options.width must not be less than 5, received ${width}`)
 })
 
-ava.test('.build() should throw an error if height is less than 5', (test) => {
+ava('.build() should throw an error if height is less than 5', (test) => {
   const width = 20
   const height = 4
 
@@ -329,12 +329,12 @@ ava.test('.build() should throw an error if height is less than 5', (test) => {
       width,
       height
     })
-  }, RangeError)
+  })
 
   test.is(error.message, `DungeoneerError: options.height must not be less than 5, received ${height}`)
 })
 
-ava.test('.build() every room should have numerical height, width, x, and y properties', (test) => {
+ava('.build() every room should have numerical height, width, x, and y properties', (test) => {
   const width = 21
   const height = 21
   const dungeon = dungeoneer.build({
@@ -350,7 +350,7 @@ ava.test('.build() every room should have numerical height, width, x, and y prop
   }
 })
 
-ava.test('.build() every room should fall within the bounds of the declared height and width', (test) => {
+ava('.build() every room should fall within the bounds of the declared height and width', (test) => {
   const width = 21
   const height = 21
   const dungeon = dungeoneer.build({
@@ -364,7 +364,7 @@ ava.test('.build() every room should fall within the bounds of the declared heig
   }
 })
 
-ava.test('.build() every room should be surrounded by either wall or door tiles', (test) => {
+ava('.build() every room should be surrounded by either wall or door tiles', (test) => {
   const width = 21
   const height = 21
   const dungeon = dungeoneer.build({
@@ -408,7 +408,7 @@ ava.test('.build() every room should be surrounded by either wall or door tiles'
   }
 })
 
-ava.test('.build() every room should have at least one adjacent door tile', (test) => {
+ava('.build() every room should have at least one adjacent door tile', (test) => {
   const width = 21
   const height = 21
   const dungeon = dungeoneer.build({
@@ -452,7 +452,7 @@ ava.test('.build() every room should have at least one adjacent door tile', (tes
   }
 })
 
-ava.test('.build() every room should be made up of an area of floor tiles', (test) => {
+ava('.build() every room should be made up of an area of floor tiles', (test) => {
   const width = 21
   const height = 21
   const dungeon = dungeoneer.build({
@@ -472,7 +472,7 @@ ava.test('.build() every room should be made up of an area of floor tiles', (tes
   test.pass()
 })
 
-ava.test('.build() should return a re-usable seed', (test) => {
+ava('.build() should return a re-usable seed', (test) => {
   const width = 21
   const height = 21
   const dungeon1 = dungeoneer.build({
@@ -489,7 +489,7 @@ ava.test('.build() should return a re-usable seed', (test) => {
   test.deepEqual(dungeon1.toJS(), dungeon2.toJS())
 })
 
-ava.test('.build() seeded dungeons should be consisten', (test) => {
+ava('.build() seeded dungeons should be consisten', (test) => {
   const width = 21
   const height = 21
   const dungeon = dungeoneer.build({
@@ -501,7 +501,7 @@ ava.test('.build() seeded dungeons should be consisten', (test) => {
   test.deepEqual(dungeon.toJS(), foobarbazDungeon)
 })
 
-ava.test('.build() should be seedable', (test) => {
+ava('.build() should be seedable', (test) => {
   const width = 21
   const height = 21
   const dungeon1 = dungeoneer.build({
@@ -519,24 +519,6 @@ ava.test('.build() should be seedable', (test) => {
   test.deepEqual(dungeon1.toJS(), dungeon2.toJS())
 })
 
-ava.test('.build() should throw an error if width is less than 5', (test) => {
-  test.throws(() => {
-    dungeoneer.build({
-      width: 3,
-      height: 10
-    })
-  })
-})
-
-ava.test('.build() should throw an error if height is less than 5', (test) => {
-  test.throws(() => {
-    dungeoneer.build({
-      width: 10,
-      height: 3
-    })
-  })
-})
-
 const sizes = [
   [5, 7],
   [7, 7],
@@ -546,7 +528,7 @@ const sizes = [
 ]
 
 for (const [width, height] of sizes) {
-  ava.test(`.build() Should reliably create ${width} x ${height} dungeons`, (test) => {
+  ava(`.build() Should reliably create ${width} x ${height} dungeons`, (test) => {
     let count = 10
 
     while (count--) {
