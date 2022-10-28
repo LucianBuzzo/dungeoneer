@@ -1,15 +1,21 @@
 const dungeoneer = require('..')
 const packageJSON = require('../package')
 
-const WIDTH = 51
-const HEIGHT = 51
+const LEVEL = 1
 
 const canvas = document.querySelector('canvas')
 const ctx = canvas.getContext('2d')
 
 ctx.imageSmoothingEnabled = false
 
-const create = function (width, height) {
+const create = function (level) {
+  // first level: 21 x 21
+  // 2nd: 25 x 25
+  // 3rd: 31 x 31
+  // 4th: 35 x 35
+  // 5th: 41 x 41
+  const width = 20 + ((level - 1) * 5)
+  const height = 20 + ((level - 1) * 5)
   const cellSize = 4
   const dungeon = dungeoneer.build({
     width: width,
@@ -73,10 +79,10 @@ document.querySelector('#dice-svg svg').addEventListener('mousedown', function (
 
 document.querySelector('#dice-svg svg').addEventListener('mouseup', function () {
   document.querySelector('#dice-svg svg').classList.remove('mousedown')
-  create(WIDTH, HEIGHT)
+  create(LEVEL)
 }, false)
 
-create(WIDTH, HEIGHT)
+create(LEVEL)
 
 window.create = create
 
