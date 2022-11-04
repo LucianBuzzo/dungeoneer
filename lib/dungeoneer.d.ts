@@ -16,6 +16,8 @@ declare module "dungeoneer" {
 
     // 'floor' and 'door' are passable terrain and a wall is impassable terrain.
     type: "wall" | "floor" | "door";
+    loot: boolean;
+    bigLoot: boolean;
   };
 
   interface Tile extends PlainTile {
@@ -48,8 +50,9 @@ declare module "dungeoneer" {
   };
 
   function build(options: {
-    width: number;
-    height: number;
+    level?: number;
+    width?: number;
+    height?: number;
     seed?: string | number;
   }): Dungeon;
 }

@@ -1,7 +1,7 @@
 const dungeoneer = require('..')
 const packageJSON = require('../package')
 
-const LEVEL = 1
+const LEVEL = 2
 
 const canvas = document.querySelector('canvas')
 const ctx = canvas.getContext('2d')
@@ -14,12 +14,11 @@ const create = function (level) {
   // 3rd: 31 x 31
   // 4th: 35 x 35
   // 5th: 41 x 41
-  const width = 20 + ((level - 1) * 5)
-  const height = 20 + ((level - 1) * 5)
+  const width = (16 + ((level - 1) * 4)) * 2
+  const height = (16 + ((level - 1) * 4)) * 2
   const cellSize = 4
   const dungeon = dungeoneer.build({
-    width: width,
-    height: height
+    level
   })
 
   console.log('Generated dungeon', dungeon)
@@ -45,7 +44,15 @@ const create = function (level) {
   for (let x = 0; x < dungeon.tiles.length; x++) {
     for (let y = 0; y < dungeon.tiles[x].length; y++) {
       if (dungeon.tiles[x][y].type === 'floor') {
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.5)'
+        if (dungeon.tiles[x][y].loot) {
+          if (dungeon.tiles[x][y].bigLoot) {
+            ctx.fillStyle = 'purple'
+          } else {
+            ctx.fillStyle = 'orange'
+          }
+        } else {
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.5)'
+        }
         ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize)
       }
       if (dungeon.tiles[x][y].type === 'door') {
