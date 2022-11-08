@@ -18,6 +18,7 @@ declare module "dungeoneer" {
     type: "wall" | "floor" | "door";
     loot: boolean;
     bigLoot: boolean;
+    rooms: Room[];
   };
 
   interface Tile extends PlainTile {
@@ -29,6 +30,8 @@ declare module "dungeoneer" {
     width: number;
     x: number;
     y: number;
+    doors: Tile[];
+    region: number;
   };
 
   interface Room extends PlainRoom {
