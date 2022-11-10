@@ -18,8 +18,7 @@ declare module "dungeoneer" {
     type: "wall" | "floor" | "door";
     loot: boolean;
     bigLoot: boolean;
-    rooms: Room[];
-  };
+  }
 
   interface Tile extends PlainTile {
     toJS(): PlainTile;
@@ -30,8 +29,6 @@ declare module "dungeoneer" {
     width: number;
     x: number;
     y: number;
-    doors: Tile[];
-    region: number;
   };
 
   interface Room extends PlainRoom {
@@ -46,11 +43,18 @@ declare module "dungeoneer" {
     intersects(other: Room): boolean;
   }
 
-  type Dungeon = {
+  interface PlainDungeon {
+    rooms: PlainRoom[];
+    tiles: Array<PlainTile[]>;
+    seed: string | number;
+  }
+
+  interface Dungeon {
     rooms: Room[];
     tiles: Array<Tile[]>;
     seed: string | number;
-  };
+    toJS: () => PlainDungeon;
+  }
 
   function build(options: {
     level?: number;
