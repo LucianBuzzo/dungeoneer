@@ -1,7 +1,7 @@
 const dungeoneer = require('..')
 const packageJSON = require('../package')
 
-const LEVEL = 2
+const LEVEL = 1
 
 const canvas = document.querySelector('canvas')
 const ctx = canvas.getContext('2d')
