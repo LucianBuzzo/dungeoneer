@@ -489,7 +489,7 @@ ava('.build() should return a re-usable seed', (test) => {
   test.deepEqual(dungeon1.toJS(), dungeon2.toJS())
 })
 
-ava('.build() seeded dungeons should be consisten', (test) => {
+ava('.build() seeded dungeons should be consistent', (test) => {
   const width = 21
   const height = 21
   const dungeon = dungeoneer.build({
