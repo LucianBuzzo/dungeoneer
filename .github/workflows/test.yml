@@ -15,7 +15,7 @@ jobs:
         with:
           node-version: 16
           cache: 'npm'
-      - run: npm ci
+      - run: npm install
       - run: npm test
         env:
           CI: true
