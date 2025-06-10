@@ -133,7 +133,7 @@ ava('.build() tiles on the south edge should not list a southern neighbour', (te
   for (let x = 0; x < width; x++) {
     const tile = dungeon.tiles[x][height - 1]
 
-    test.false(tile.neighbours.s)
+    test.falsy(tile.neighbours.s)
   }
 })
 
