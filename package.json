@@ -41,7 +41,8 @@
     "stryker": "^0.33.1",
     "stryker-api": "^0.22.0",
     "stryker-html-reporter": "^0.16.9",
-    "stryker-javascript-mutator": "^0.12.1"
+    "stryker-javascript-mutator": "^0.12.1",
+    "versionist": "^8.0.0"
   },
   "ava": {
     "files": [
