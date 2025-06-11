@@ -1,0 +1,33 @@
+name: Versionist Release
+
+on:
+  push:
+    branches:
+      - master
+      - main
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - run: npm install
+      - name: Run versionist
+        run: npx versionist
+      - name: Commit and tag release
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add CHANGELOG.md package.json
+          if git diff --cached --quiet; then
+            echo "No versionist changes to commit"
+            exit 0
+          fi
+          VERSION=$(node -p "require('./package.json').version")
+          git commit -m "chore(release): v$VERSION"
+          git tag -a "v$VERSION" -m "v$VERSION"
+          git push --follow-tags

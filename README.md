@@ -109,3 +109,17 @@ The icon at the top of this file is provided by
 [svgrepo.com](https://www.svgrepo.com/svg/293783/architecture-blueprint) and is
 licensed under [Creative Commons BY
 4.0](https://creativecommons.org/licenses/by/4.0/).
+
+## Contributing
+
+This project uses [Versionist](https://github.com/balena-io/versionist) to maintain the changelog and version numbers. Each commit must include a footer specifying the semantic version change and a changelog entry:
+
+```
+docs: improve README
+
+Change-Type: patch
+Changelog-Entry: Improve README documentation
+Signed-off-by: Your Name <you@example.com>
+```
+
+The `Change-Type` can be `major`, `minor` or `patch`. `Changelog-Entry` is a short description of the change. Releases are automatically created when changes land on the `master` branch.
