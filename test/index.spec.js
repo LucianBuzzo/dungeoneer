@@ -519,6 +519,25 @@ ava('.build() should be seedable', (test) => {
   test.deepEqual(dungeon1.toJS(), dungeon2.toJS())
 })
 
+ava('.build() should accept falsy seeds like 0', (test) => {
+  const width = 21
+  const height = 21
+  const dungeon1 = dungeoneer.build({
+    width,
+    height,
+    seed: 0
+  })
+
+  const dungeon2 = dungeoneer.build({
+    width,
+    height,
+    seed: 0
+  })
+
+  test.deepEqual(dungeon1.toJS(), dungeon2.toJS())
+  test.is(dungeon1.seed, 0)
+})
+
 const sizes = [
   [5, 7],
   [7, 7],
