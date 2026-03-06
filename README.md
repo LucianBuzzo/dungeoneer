@@ -78,12 +78,60 @@ type Room = {
   y: number;
 }
 
+type BuildConstraints = {
+  minRooms?: number;
+  maxRooms?: number;
+  minRoomSize?: number;
+  maxRoomSize?: number;
+  maxDeadEnds?: number;
+}
+
 type Dungeon = {
   rooms: Room[];
   tiles: Array<Tile[]>;
   seed: string | number;
+  toJS(): {
+    rooms: Room[];
+    tiles: Array<Pick<Tile, 'x' | 'y' | 'type'>[]>;
+    seed: string | number;
+  };
 }
 ```
+
+## Constraints
+
+You can optionally pass a `constraints` object to influence generation output.
+
+```js
+const dungeon = dungeoneer.build({
+  width: 41,
+  height: 41,
+  seed: 'my-seed',
+  constraints: {
+    minRooms: 3,
+    maxRooms: 7,
+    minRoomSize: 5,
+    maxRoomSize: 11,
+    maxDeadEnds: 8
+  }
+})
+```
+
+### Constraint reference
+
+- `minRooms` (integer, `>= 1`): minimum number of generated rooms.
+- `maxRooms` (integer, `>= 1`): maximum number of generated rooms.
+- `minRoomSize` (integer, `>= 1`): lower room size bound.
+- `maxRoomSize` (integer, `>= 1`): upper room size bound.
+- `maxDeadEnds` (integer, `>= 0`): maximum number of corridor dead ends to keep after pruning.
+
+### Notes and caveats
+
+- Room dimensions are always odd-sized internally to align with maze carving.
+- If `minRoomSize` / `maxRoomSize` are even, they are normalized to odd bounds.
+- If room targets are infeasible (for example too many rooms for a tiny stage), `build()` throws a `DungeoneerError`.
+- If constraints are omitted, generation behavior remains unchanged from legacy defaults.
+- `maxDeadEnds: 0` is equivalent to default full dead-end removal.
 
 ## Seeding
 
