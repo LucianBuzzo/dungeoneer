@@ -211,7 +211,8 @@ create()
 window.create = create
 
 const $version = document.createElement('div')
-$version.innerText = `v${packageJSON.version}`
+const shortSha = (process.env.DEMO_GIT_SHA || 'local').slice(0, 7)
+$version.innerText = `v${packageJSON.version} (${shortSha})`
 $version.style = `
   color: white;
   position: absolute;
