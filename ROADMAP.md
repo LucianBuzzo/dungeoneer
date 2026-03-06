@@ -33,10 +33,18 @@ Build a deterministic, ergonomic dungeon generation library with:
 
 ### Deliverables
 
-- [ ] Constraint option schema and validation
-- [ ] Constraint-aware generation pass(es)
-- [ ] Regression tests for deterministic behaviour
-- [ ] README section with examples and caveats
+- [x] Constraint option schema and validation
+- [x] Constraint-aware generation pass(es)
+- [x] Regression tests for deterministic behaviour
+- [x] README section with examples and caveats
+
+### Completed in
+
+- #52 — constraints schema and validation
+- #53 — constraint-aware room generation
+- #54 — dead-end budget control
+- #55 — deterministic and edge-case coverage
+- #56 — constraints documentation
 
 ### Success criteria
 
