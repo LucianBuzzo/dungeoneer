@@ -5,6 +5,7 @@ import _ from 'underscore'
 import Room, { PlainRoom } from './room'
 import Tile, { PlainTile, TileNeighbours, TileType } from './tile'
 import addChokePoints from './plugins/add-choke-points'
+import addSecrets from './plugins/add-secrets'
 
 type BuildConstraints = {
   minRooms?: number;
@@ -586,6 +587,7 @@ const build = (options: BuildOptions): DungeonOutput => {
 module.exports = {
   build,
   plugins: {
-    addChokePoints
+    addChokePoints,
+    addSecrets
   }
 }

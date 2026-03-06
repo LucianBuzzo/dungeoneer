@@ -713,6 +713,64 @@ ava('plugins.addChokePoints() should add choke-point doors up to maxCount', (tes
   test.true(doorDelta <= maxCount)
 })
 
+ava('plugins.addSecrets() should be deterministic with a fixed seed', (test) => {
+  const plugin = dungeoneer.plugins.addSecrets({
+    inverseChance: 4,
+    maxCount: 10
+  })
+
+  const options = {
+    width: 41,
+    height: 41,
+    seed: 'plugin-secrets-determinism',
+    plugins: [plugin]
+  }
+
+  const dungeon1 = dungeoneer.build(options)
+  const dungeon2 = dungeoneer.build(options)
+
+  test.deepEqual(dungeon1.toJS(), dungeon2.toJS())
+})
+
+ava('plugins.addSecrets() should add secret doors up to maxCount', (test) => {
+  const maxCount = 4
+
+  const withoutPlugin = dungeoneer.build({
+    width: 41,
+    height: 41,
+    seed: 'plugin-secrets-count'
+  })
+
+  const withPlugin = dungeoneer.build({
+    width: 41,
+    height: 41,
+    seed: 'plugin-secrets-count',
+    plugins: [dungeoneer.plugins.addSecrets({
+      inverseChance: 1,
+      maxCount
+    })]
+  })
+
+  const countDoors = (dungeon) => {
+    let count = 0
+
+    for (const row of dungeon.tiles) {
+      for (const tile of row) {
+        if (tile.type === 'door') {
+          count++
+        }
+      }
+    }
+
+    return count
+  }
+
+  const doorDelta = countDoors(withPlugin) - countDoors(withoutPlugin)
+
+  test.true(doorDelta >= 0)
+  test.true(doorDelta <= maxCount)
+})
+
 ava('.build() every room should have numerical height, width, x, and y properties', (test) => {
   const width = 21
   const height = 21
