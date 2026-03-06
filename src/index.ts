@@ -4,6 +4,7 @@ import _ from 'underscore'
 
 import Room, { PlainRoom } from './room'
 import Tile, { PlainTile, TileNeighbours, TileType } from './tile'
+import addChokePoints from './plugins/add-choke-points'
 
 type BuildConstraints = {
   minRooms?: number;
@@ -13,11 +14,22 @@ type BuildConstraints = {
   maxDeadEnds?: number;
 }
 
+type PluginContext = {
+  rooms: Room[];
+  tiles: Array<Tile[]>;
+  seed: string | number;
+  randBetween: (min: number, max: number) => number;
+  oneIn: (num: number) => boolean;
+}
+
+type DungeonPlugin = (context: PluginContext) => void
+
 type BuildOptions = {
   width: number;
   height: number;
   seed?: string | number;
   constraints?: BuildConstraints;
+  plugins?: DungeonPlugin[];
 }
 
 type DungeonOutput = {
@@ -46,6 +58,14 @@ const assertInteger = (value: number, path: string): void => {
   if (!Number.isInteger(value)) {
     throw new RangeError(`DungeoneerError: ${path} must be an integer, received ${value}`)
   }
+}
+
+const validatePlugins = (plugins: DungeonPlugin[]): void => {
+  plugins.forEach((plugin, index) => {
+    if (typeof plugin !== 'function') {
+      throw new TypeError(`DungeoneerError: options.plugins[${index}] must be a function`)
+    }
+  })
 }
 
 const validateConstraints = (constraints: BuildConstraints): void => {
@@ -424,6 +444,20 @@ const Dungeon = function Dungeon () {
     })
   }
 
+  const _applyPlugins = (plugins: DungeonPlugin[], seed: string | number): void => {
+    const context: PluginContext = {
+      rooms: _rooms,
+      tiles: _tiles,
+      seed,
+      randBetween,
+      oneIn: _oneIn
+    }
+
+    for (const plugin of plugins) {
+      plugin(context)
+    }
+  }
+
   const _removeDeadEnds = (): void => {
     const maxDeadEnds = stage.constraints?.maxDeadEnds
 
@@ -493,6 +527,10 @@ const Dungeon = function Dungeon () {
       validateConstraints(mutableStage.constraints)
     }
 
+    if (mutableStage.plugins) {
+      validatePlugins(mutableStage.plugins)
+    }
+
     if (mutableStage.width % 2 === 0) {
       mutableStage.width += 1
     }
@@ -524,6 +562,10 @@ const Dungeon = function Dungeon () {
     _connectRegions()
     _removeDeadEnds()
 
+    if (mutableStage.plugins) {
+      _applyPlugins(mutableStage.plugins, seed)
+    }
+
     return {
       rooms: _rooms,
       tiles: _tiles,
@@ -542,5 +584,8 @@ const build = (options: BuildOptions): DungeonOutput => {
 }
 
 module.exports = {
-  build
+  build,
+  plugins: {
+    addChokePoints
+  }
 }

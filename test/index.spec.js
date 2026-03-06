@@ -622,6 +622,97 @@ for (const scenario of deterministicConstraintCases) {
   })
 }
 
+ava('.build() should throw if a plugin entry is not a function', (test) => {
+  const error = test.throws(() => {
+    dungeoneer.build({
+      width: 21,
+      height: 21,
+      plugins: [null]
+    })
+  })
+
+  test.is(error.message, 'DungeoneerError: options.plugins[0] must be a function')
+})
+
+ava('.build() should apply plugins in the order they are provided', (test) => {
+  const calls = []
+
+  const pluginA = () => {
+    calls.push('a')
+  }
+
+  const pluginB = () => {
+    calls.push('b')
+  }
+
+  dungeoneer.build({
+    width: 21,
+    height: 21,
+    seed: 'plugin-order',
+    plugins: [pluginA, pluginB]
+  })
+
+  test.deepEqual(calls, ['a', 'b'])
+})
+
+ava('plugins.addChokePoints() should be deterministic with a fixed seed', (test) => {
+  const plugin = dungeoneer.plugins.addChokePoints({
+    inverseChance: 5,
+    maxCount: 12
+  })
+
+  const options = {
+    width: 41,
+    height: 41,
+    seed: 'plugin-determinism',
+    plugins: [plugin]
+  }
+
+  const dungeon1 = dungeoneer.build(options)
+  const dungeon2 = dungeoneer.build(options)
+
+  test.deepEqual(dungeon1.toJS(), dungeon2.toJS())
+})
+
+ava('plugins.addChokePoints() should add choke-point doors up to maxCount', (test) => {
+  const maxCount = 5
+
+  const withoutPlugin = dungeoneer.build({
+    width: 41,
+    height: 41,
+    seed: 'plugin-chokes-count'
+  })
+
+  const withPlugin = dungeoneer.build({
+    width: 41,
+    height: 41,
+    seed: 'plugin-chokes-count',
+    plugins: [dungeoneer.plugins.addChokePoints({
+      inverseChance: 1,
+      maxCount
+    })]
+  })
+
+  const countDoors = (dungeon) => {
+    let count = 0
+
+    for (const row of dungeon.tiles) {
+      for (const tile of row) {
+        if (tile.type === 'door') {
+          count++
+        }
+      }
+    }
+
+    return count
+  }
+
+  const doorDelta = countDoors(withPlugin) - countDoors(withoutPlugin)
+
+  test.true(doorDelta >= 0)
+  test.true(doorDelta <= maxCount)
+})
+
 ava('.build() every room should have numerical height, width, x, and y properties', (test) => {
   const width = 21
   const height = 21
