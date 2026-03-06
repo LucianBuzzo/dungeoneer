@@ -536,6 +536,92 @@ ava('.build() with maxDeadEnds=0 should match default dead-end removal behavior'
   test.deepEqual(defaultDungeon.toJS(), constrainedDungeon.toJS())
 })
 
+ava('.build() should reject infeasible odd room-size normalization ranges', (test) => {
+  const error = test.throws(() => {
+    dungeoneer.build({
+      width: 21,
+      height: 21,
+      seed: 'infeasible-size-constraints',
+      constraints: {
+        minRoomSize: 2,
+        maxRoomSize: 2
+      }
+    })
+  })
+
+  test.is(error.message, 'DungeoneerError: room size constraints are infeasible for this stage size (21x21)')
+})
+
+ava('.build() should normalize even room size constraints to odd room sizes', (test) => {
+  const dungeon = dungeoneer.build({
+    width: 51,
+    height: 51,
+    seed: 'even-room-size-constraints',
+    constraints: {
+      minRoomSize: 4,
+      maxRoomSize: 8
+    }
+  })
+
+  for (const room of dungeon.rooms) {
+    test.true(room.width >= 5)
+    test.true(room.width <= 7)
+    test.true(room.height >= 5)
+    test.true(room.height <= 7)
+    test.true(room.width % 2 === 1)
+    test.true(room.height % 2 === 1)
+  }
+})
+
+const deterministicConstraintCases = [
+  {
+    name: 'min/max rooms only',
+    constraints: {
+      minRooms: 2,
+      maxRooms: 5
+    }
+  },
+  {
+    name: 'room size bounds only',
+    constraints: {
+      minRoomSize: 5,
+      maxRoomSize: 9
+    }
+  },
+  {
+    name: 'dead-end budget only',
+    constraints: {
+      maxDeadEnds: 6
+    }
+  },
+  {
+    name: 'combined M1 constraints',
+    constraints: {
+      minRooms: 2,
+      maxRooms: 6,
+      minRoomSize: 3,
+      maxRoomSize: 9,
+      maxDeadEnds: 10
+    }
+  }
+]
+
+for (const scenario of deterministicConstraintCases) {
+  ava(`.build() should remain deterministic for constraint scenario: ${scenario.name}`, (test) => {
+    const options = {
+      width: 41,
+      height: 41,
+      seed: `determinism-${scenario.name}`,
+      constraints: scenario.constraints
+    }
+
+    const dungeon1 = dungeoneer.build(options)
+    const dungeon2 = dungeoneer.build(options)
+
+    test.deepEqual(dungeon1.toJS(), dungeon2.toJS())
+  })
+}
+
 ava('.build() every room should have numerical height, width, x, and y properties', (test) => {
   const width = 21
   const height = 21

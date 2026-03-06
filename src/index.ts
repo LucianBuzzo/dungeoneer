@@ -463,10 +463,6 @@ const Dungeon = function Dungeon () {
 
       _tiles.forEach((row) => {
         row.forEach((tile) => {
-          if (maxDeadEnds !== undefined && countDeadEnds() <= maxDeadEnds) {
-            return
-          }
-
           if (isRemovableDeadEnd(tile)) {
             tile.type = 'wall'
             isDone = false
