@@ -281,19 +281,74 @@ const Dungeon = function Dungeon () {
   }
 
   const _addRooms = (): void => {
-    for (let i = 0; i < numRoomTries; i++) {
-      const size = randBetween(1, 3 + roomExtraSize) * 2 + 1
-      const rectangularity = randBetween(0, 1 + Math.floor(size / 2)) * 2
-      let width = size
-      let height = size
-      if (_oneIn(2)) {
-        width += rectangularity
-      } else {
-        height += rectangularity
+    const constraints = stage.constraints
+
+    const minRooms = constraints?.minRooms ?? 0
+    const maxRooms = constraints?.maxRooms ?? Number.POSITIVE_INFINITY
+
+    const minConfiguredRoomSize = constraints?.minRoomSize
+    const maxConfiguredRoomSize = constraints?.maxRoomSize
+
+    const usesRoomSizeConstraints = minConfiguredRoomSize !== undefined || maxConfiguredRoomSize !== undefined
+
+    const maxFeasibleRoomSize = Math.max(1, Math.min(stage.width - 4, stage.height - 4))
+
+    const toOddCeil = (value: number): number => {
+      return value % 2 === 0 ? value + 1 : value
+    }
+
+    const toOddFloor = (value: number): number => {
+      return value % 2 === 0 ? value - 1 : value
+    }
+
+    const pickOddInRange = (min: number, max: number): number => {
+      const oddMin = toOddCeil(min)
+      const oddMax = toOddFloor(max)
+
+      if (oddMin > oddMax) {
+        throw new RangeError(`DungeoneerError: room size constraints are infeasible for this stage size (${stage.width}x${stage.height})`)
       }
 
-      width = Math.min(width, stage.width - 4)
-      height = Math.min(height, stage.height - 4)
+      const steps = Math.floor((oddMax - oddMin) / 2)
+      return oddMin + (randBetween(0, steps) * 2)
+    }
+
+    const maxAttempts = Math.max(
+      numRoomTries,
+      minRooms * 25,
+      Number.isFinite(maxRooms) ? maxRooms * 10 : 0
+    )
+
+    let attempts = 0
+
+    while (attempts < maxAttempts && _rooms.length < maxRooms) {
+      attempts++
+
+      let width: number
+      let height: number
+
+      if (usesRoomSizeConstraints) {
+        const minSize = Math.min(minConfiguredRoomSize ?? 3, maxFeasibleRoomSize)
+        const maxSize = Math.min(maxConfiguredRoomSize ?? maxFeasibleRoomSize, maxFeasibleRoomSize)
+
+        width = pickOddInRange(minSize, maxSize)
+        height = pickOddInRange(minSize, maxSize)
+      } else {
+        const size = randBetween(1, 3 + roomExtraSize) * 2 + 1
+        const rectangularity = randBetween(0, 1 + Math.floor(size / 2)) * 2
+
+        width = size
+        height = size
+
+        if (_oneIn(2)) {
+          width += rectangularity
+        } else {
+          height += rectangularity
+        }
+
+        width = Math.min(width, stage.width - 4)
+        height = Math.min(height, stage.height - 4)
+      }
 
       let x = randBetween(0, Math.floor((stage.width - width) / 2)) * 2 + 1
       let y = randBetween(0, Math.floor((stage.height - height) / 2)) * 2 + 1
@@ -323,6 +378,10 @@ const Dungeon = function Dungeon () {
       _rooms.push(room)
       _startRegion()
       carveArea(x, y, width, height)
+    }
+
+    if (_rooms.length < minRooms) {
+      throw new RangeError(`DungeoneerError: unable to satisfy options.constraints.minRooms=${minRooms}; generated ${_rooms.length} room(s)`)
     }
   }
 

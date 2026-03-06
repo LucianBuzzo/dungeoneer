@@ -409,6 +409,73 @@ ava('.build() should throw for negative maxDeadEnds', (test) => {
   test.is(error.message, 'DungeoneerError: options.constraints.maxDeadEnds must be greater than or equal to 0, received -1')
 })
 
+ava('.build() should cap room count to maxRooms when provided', (test) => {
+  const dungeon = dungeoneer.build({
+    width: 51,
+    height: 51,
+    seed: 'max-rooms-check',
+    constraints: {
+      maxRooms: 3
+    }
+  })
+
+  test.true(dungeon.rooms.length <= 3)
+})
+
+ava('.build() should honor room size constraints when provided', (test) => {
+  const dungeon = dungeoneer.build({
+    width: 51,
+    height: 51,
+    seed: 'room-size-constraints-check',
+    constraints: {
+      minRoomSize: 5,
+      maxRoomSize: 9
+    }
+  })
+
+  for (const room of dungeon.rooms) {
+    test.true(room.width >= 5)
+    test.true(room.width <= 9)
+    test.true(room.height >= 5)
+    test.true(room.height <= 9)
+  }
+})
+
+ava('.build() should throw when minRooms cannot be satisfied', (test) => {
+  const error = test.throws(() => {
+    dungeoneer.build({
+      width: 11,
+      height: 11,
+      seed: 'unsatisfied-min-rooms',
+      constraints: {
+        minRooms: 20,
+        maxRooms: 20
+      }
+    })
+  })
+
+  test.true(error.message.startsWith('DungeoneerError: unable to satisfy options.constraints.minRooms=20'))
+})
+
+ava('.build() should remain deterministic with constraints and a fixed seed', (test) => {
+  const options = {
+    width: 31,
+    height: 31,
+    seed: 'constraints-determinism',
+    constraints: {
+      minRooms: 3,
+      maxRooms: 6,
+      minRoomSize: 3,
+      maxRoomSize: 9
+    }
+  }
+
+  const dungeon1 = dungeoneer.build(options)
+  const dungeon2 = dungeoneer.build(options)
+
+  test.deepEqual(dungeon1.toJS(), dungeon2.toJS())
+})
+
 ava('.build() every room should have numerical height, width, x, and y properties', (test) => {
   const width = 21
   const height = 21
