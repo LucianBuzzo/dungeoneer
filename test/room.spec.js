@@ -1,5 +1,5 @@
 const ava = require('ava')
-const Room = require('../lib/room')
+const Room = require('../dist/room').default
 
 ava('Room objects should contain an x property', (test) => {
   test.is(new Room(2, 2, 10, 10).x, 2)

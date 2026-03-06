@@ -2,20 +2,26 @@
   "name": "dungeoneer",
   "version": "3.0.0",
   "description": "A procedural dungeon generator",
-  "main": "lib/index.js",
-  "types": "./lib/dungeoneer.d.ts",
+  "main": "dist/index.js",
+  "types": "./dist/index.d.ts",
   "homepage": "https://github.com/LucianBuzzo/dungeoneer",
   "repository": {
     "type": "git",
     "url": "git://github.com/LucianBuzzo/dungeoneer.git"
   },
   "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "pretest": "npm run build",
+    "predev": "npm run build",
+    "prebuild:demo": "npm run build",
     "test": "nyc --reporter=lcov ava -v",
-    "lint": "standard 'lib/**/*.js' 'test/**/*.js' 'demo/main.js'",
-    "ci": "npm run lint && npm run test",
+    "lint": "standard 'test/**/*.js' 'demo/main.js'",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "ci": "npm run lint && npm run typecheck && npm run test",
     "mutate": "stryker run",
     "dev": "parcel ./demo/index.html",
-    "build": "parcel build --public-url --no-minify ./demo/index.html"
+    "build:demo": "parcel build --public-url --no-minify ./demo/index.html",
+    "prepublishOnly": "npm run build"
   },
   "keywords": [
     "procedural",
@@ -37,6 +43,10 @@
     "victor": "^1.1.0"
   },
   "devDependencies": {
+    "@types/chance": "^1.1.7",
+    "@types/node": "^22.13.10",
+    "@types/underscore": "^1.11.15",
+    "@types/victor": "^1.1.5",
     "ava": "^3.15.0",
     "nyc": "^15.1.0",
     "parcel": "^2.0.1",
@@ -45,6 +55,7 @@
     "stryker-api": "^0.22.0",
     "stryker-html-reporter": "^0.16.9",
     "stryker-javascript-mutator": "^0.12.1",
+    "typescript": "^5.8.2",
     "versionist": "^8.0.0"
   },
   "ava": {
