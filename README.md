@@ -112,14 +112,11 @@ licensed under [Creative Commons BY
 
 ## Contributing
 
-This project uses [Versionist](https://github.com/balena-io/versionist) to maintain the changelog and version numbers. Each commit must include a footer specifying the semantic version change and a changelog entry:
+This project uses Release Please for automated versioning and changelog generation.
 
-```
-docs: improve README
+Use Conventional Commits where possible (for example `feat:`, `fix:`, `docs:`). To signal a breaking change, use either:
 
-Change-Type: patch
-Changelog-Entry: Improve README documentation
-Signed-off-by: Your Name <you@example.com>
-```
+- a `!` after the type/scope, e.g. `feat!: ...`
+- or a `BREAKING CHANGE:` footer in the commit body
 
-The `Change-Type` can be `major`, `minor` or `patch`. `Changelog-Entry` is a short description of the change. Releases are automatically created when changes land on the `master` branch.
+Releases are automatically created from changes merged into `master`.
