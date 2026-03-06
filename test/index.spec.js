@@ -476,6 +476,66 @@ ava('.build() should remain deterministic with constraints and a fixed seed', (t
   test.deepEqual(dungeon1.toJS(), dungeon2.toJS())
 })
 
+const countRemovableDeadEnds = (dungeon) => {
+  let count = 0
+
+  for (const row of dungeon.tiles) {
+    for (const tile of row) {
+      if (tile.type === 'wall') {
+        continue
+      }
+
+      const inRoom = dungeon.rooms.find((room) => room.containsTile(tile.x, tile.y))
+      if (inRoom) {
+        continue
+      }
+
+      const cardinalNeighbours = [tile.neighbours.n, tile.neighbours.e, tile.neighbours.s, tile.neighbours.w]
+      const exits = cardinalNeighbours.filter((n) => n && n.type !== 'wall').length
+
+      if (exits <= 1) {
+        count++
+      }
+    }
+  }
+
+  return count
+}
+
+ava('.build() should constrain dead-end removal to maxDeadEnds when provided', (test) => {
+  const constrained = dungeoneer.build({
+    width: 41,
+    height: 41,
+    seed: 'max-deadends-constraint',
+    constraints: {
+      maxDeadEnds: 8
+    }
+  })
+
+  test.true(countRemovableDeadEnds(constrained) <= 8)
+})
+
+ava('.build() with maxDeadEnds=0 should match default dead-end removal behavior', (test) => {
+  const seed = 'max-deadends-zero-equivalence'
+
+  const defaultDungeon = dungeoneer.build({
+    width: 31,
+    height: 31,
+    seed
+  })
+
+  const constrainedDungeon = dungeoneer.build({
+    width: 31,
+    height: 31,
+    seed,
+    constraints: {
+      maxDeadEnds: 0
+    }
+  })
+
+  test.deepEqual(defaultDungeon.toJS(), constrainedDungeon.toJS())
+})
+
 ava('.build() every room should have numerical height, width, x, and y properties', (test) => {
   const width = 21
   const height = 21

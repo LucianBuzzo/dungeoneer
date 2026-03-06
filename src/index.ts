@@ -425,19 +425,49 @@ const Dungeon = function Dungeon () {
   }
 
   const _removeDeadEnds = (): void => {
+    const maxDeadEnds = stage.constraints?.maxDeadEnds
+
+    const isRemovableDeadEnd = (tile: Tile): boolean => {
+      if (tile.type === 'wall') {
+        return false
+      }
+
+      if (_rooms.find((room) => room.containsTile(tile.x, tile.y))) {
+        return false
+      }
+
+      return getTileNESW(tile).filter(t => t.type !== 'wall').length <= 1
+    }
+
+    const countDeadEnds = (): number => {
+      let count = 0
+      _tiles.forEach((row) => {
+        row.forEach((tile) => {
+          if (isRemovableDeadEnd(tile)) {
+            count++
+          }
+        })
+      })
+
+      return count
+    }
+
     let done = false
 
     const cycle = (): boolean => {
       let isDone = true
+
+      if (maxDeadEnds !== undefined && countDeadEnds() <= maxDeadEnds) {
+        return true
+      }
+
       _tiles.forEach((row) => {
         row.forEach((tile) => {
-          if (tile.type === 'wall') {
+          if (maxDeadEnds !== undefined && countDeadEnds() <= maxDeadEnds) {
             return
           }
-          if (
-            getTileNESW(tile).filter(t => t.type !== 'wall').length <= 1 &&
-            !_rooms.find((room) => room.containsTile(tile.x, tile.y))
-          ) {
+
+          if (isRemovableDeadEnd(tile)) {
             tile.type = 'wall'
             isDone = false
           }
