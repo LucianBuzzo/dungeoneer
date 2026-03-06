@@ -6,6 +6,7 @@ import Room, { PlainRoom } from './room'
 import Tile, { PlainTile, TileNeighbours, TileType } from './tile'
 import addChokePoints from './plugins/add-choke-points'
 import addSecrets from './plugins/add-secrets'
+import addRegionTags from './plugins/add-region-tags'
 
 type BuildConstraints = {
   minRooms?: number;
@@ -588,6 +589,7 @@ module.exports = {
   build,
   plugins: {
     addChokePoints,
-    addSecrets
+    addSecrets,
+    addRegionTags
   }
 }
