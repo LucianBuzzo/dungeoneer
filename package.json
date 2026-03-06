@@ -18,7 +18,6 @@
     "lint": "standard 'test/**/*.js' 'demo/main.js'",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "ci": "npm run lint && npm run typecheck && npm run test",
-    "mutate": "stryker run",
     "dev": "parcel ./demo/index.html",
     "build:demo": "parcel build --public-url --no-minify ./demo/index.html",
     "prepublishOnly": "npm run build"
@@ -51,10 +50,6 @@
     "nyc": "^15.1.0",
     "parcel": "^2.0.1",
     "standard": "^16.0.4",
-    "stryker": "^0.33.1",
-    "stryker-api": "^0.22.0",
-    "stryker-html-reporter": "^0.16.9",
-    "stryker-javascript-mutator": "^0.12.1",
     "typescript": "^5.8.2"
   },
   "ava": {
