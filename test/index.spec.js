@@ -771,6 +771,74 @@ ava('plugins.addSecrets() should add secret doors up to maxCount', (test) => {
   test.true(doorDelta <= maxCount)
 })
 
+ava('plugins.addRegionTags() should deterministically tag passable tiles', (test) => {
+  const options = {
+    width: 41,
+    height: 41,
+    seed: 'plugin-region-tags-determinism',
+    plugins: [dungeoneer.plugins.addRegionTags()]
+  }
+
+  const dungeon1 = dungeoneer.build(options)
+  const dungeon2 = dungeoneer.build(options)
+
+  test.deepEqual(dungeon1.toJS(), dungeon2.toJS())
+})
+
+ava('plugins.addRegionTags() should assign region tags to passable tiles', (test) => {
+  const dungeon = dungeoneer.build({
+    width: 41,
+    height: 41,
+    seed: 'plugin-region-tags-presence',
+    plugins: [dungeoneer.plugins.addRegionTags()]
+  })
+
+  let passableCount = 0
+  let taggedCount = 0
+
+  for (const row of dungeon.tiles) {
+    for (const tile of row) {
+      if (tile.type === 'wall') {
+        continue
+      }
+
+      passableCount++
+
+      if (tile.regionId !== undefined && typeof tile.regionTag === 'string') {
+        taggedCount++
+      }
+    }
+  }
+
+  test.true(passableCount > 0)
+  test.is(taggedCount, passableCount)
+})
+
+ava('plugins.addRegionTags() should include corridor flavor categories in tags', (test) => {
+  const dungeon = dungeoneer.build({
+    width: 51,
+    height: 51,
+    seed: 'plugin-region-tags-flavors',
+    plugins: [dungeoneer.plugins.addRegionTags()]
+  })
+
+  const tags = new Set()
+
+  for (const row of dungeon.tiles) {
+    for (const tile of row) {
+      if (tile.regionTag) {
+        tags.add(tile.regionTag)
+      }
+    }
+  }
+
+  const hasCorridorFlavor = Array.from(tags).some((tag) => {
+    return tag.includes(':hub') || tag.includes(':branch') || tag.includes(':dead-end-cluster')
+  })
+
+  test.true(hasCorridorFlavor)
+})
+
 ava('.build() every room should have numerical height, width, x, and y properties', (test) => {
   const width = 21
   const height = 21

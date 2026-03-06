@@ -15,6 +15,8 @@ export type PlainTile = {
   x: number;
   y: number;
   type: TileType;
+  regionId?: number;
+  regionTag?: string;
 }
 
 export default class Tile {
@@ -23,6 +25,8 @@ export default class Tile {
   x: number
   y: number
   region?: number
+  regionId?: number
+  regionTag?: string
 
   constructor (type: TileType, x: number, y: number) {
     this.type = type
@@ -40,7 +44,9 @@ export default class Tile {
     return {
       x: this.x,
       y: this.y,
-      type: this.type
+      type: this.type,
+      ...(this.regionId !== undefined ? { regionId: this.regionId } : {}),
+      ...(this.regionTag !== undefined ? { regionTag: this.regionTag } : {})
     }
   }
 }
