@@ -11,7 +11,7 @@
   },
   "scripts": {
     "test": "nyc --reporter=lcov ava -v",
-    "lint": "standard",
+    "lint": "standard 'lib/**/*.js' 'test/**/*.js' 'demo/main.js'",
     "ci": "npm run lint && npm run test",
     "mutate": "stryker run",
     "dev": "parcel ./demo/index.html",
@@ -28,6 +28,9 @@
   ],
   "author": "Lucian Buzzo <lucian.buzzo@gmail.com>",
   "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
   "dependencies": {
     "chance": "^1.0.18",
     "underscore": "^1.8.3",

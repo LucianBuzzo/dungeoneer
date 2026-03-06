@@ -45,6 +45,11 @@ declare module "dungeoneer" {
     rooms: Room[];
     tiles: Array<Tile[]>;
     seed: string | number;
+    toJS(): {
+      rooms: PlainRoom[];
+      tiles: Array<PlainTile[]>;
+      seed: string | number;
+    };
   };
 
   function build(options: {
