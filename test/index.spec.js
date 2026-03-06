@@ -334,6 +334,81 @@ ava('.build() should throw an error if height is less than 5', (test) => {
   test.is(error.message, `DungeoneerError: options.height must not be less than 5, received ${height}`)
 })
 
+ava('.build() should accept valid constraints without changing invocation shape', (test) => {
+  const dungeon = dungeoneer.build({
+    width: 21,
+    height: 21,
+    constraints: {
+      minRooms: 1,
+      maxRooms: 10,
+      minRoomSize: 3,
+      maxRoomSize: 11,
+      maxDeadEnds: 20
+    }
+  })
+
+  test.truthy(dungeon.tiles)
+  test.truthy(dungeon.rooms)
+})
+
+ava('.build() should throw for non-integer constraints', (test) => {
+  const error = test.throws(() => {
+    dungeoneer.build({
+      width: 21,
+      height: 21,
+      constraints: {
+        minRooms: 1.5
+      }
+    })
+  })
+
+  test.is(error.message, 'DungeoneerError: options.constraints.minRooms must be an integer, received 1.5')
+})
+
+ava('.build() should throw when minRooms is greater than maxRooms', (test) => {
+  const error = test.throws(() => {
+    dungeoneer.build({
+      width: 21,
+      height: 21,
+      constraints: {
+        minRooms: 10,
+        maxRooms: 2
+      }
+    })
+  })
+
+  test.is(error.message, 'DungeoneerError: options.constraints.minRooms must be less than or equal to options.constraints.maxRooms')
+})
+
+ava('.build() should throw when minRoomSize is greater than maxRoomSize', (test) => {
+  const error = test.throws(() => {
+    dungeoneer.build({
+      width: 21,
+      height: 21,
+      constraints: {
+        minRoomSize: 9,
+        maxRoomSize: 5
+      }
+    })
+  })
+
+  test.is(error.message, 'DungeoneerError: options.constraints.minRoomSize must be less than or equal to options.constraints.maxRoomSize')
+})
+
+ava('.build() should throw for negative maxDeadEnds', (test) => {
+  const error = test.throws(() => {
+    dungeoneer.build({
+      width: 21,
+      height: 21,
+      constraints: {
+        maxDeadEnds: -1
+      }
+    })
+  })
+
+  test.is(error.message, 'DungeoneerError: options.constraints.maxDeadEnds must be greater than or equal to 0, received -1')
+})
+
 ava('.build() every room should have numerical height, width, x, and y properties', (test) => {
   const width = 21
   const height = 21

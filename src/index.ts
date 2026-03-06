@@ -5,10 +5,19 @@ import _ from 'underscore'
 import Room, { PlainRoom } from './room'
 import Tile, { PlainTile, TileNeighbours, TileType } from './tile'
 
+type BuildConstraints = {
+  minRooms?: number;
+  maxRooms?: number;
+  minRoomSize?: number;
+  maxRoomSize?: number;
+  maxDeadEnds?: number;
+}
+
 type BuildOptions = {
   width: number;
   height: number;
   seed?: string | number;
+  constraints?: BuildConstraints;
 }
 
 type DungeonOutput = {
@@ -32,6 +41,58 @@ const getTileNESW = (tile: Tile): Tile[] => {
 }
 
 const nameChance = new Chance()
+
+const assertInteger = (value: number, path: string): void => {
+  if (!Number.isInteger(value)) {
+    throw new RangeError(`DungeoneerError: ${path} must be an integer, received ${value}`)
+  }
+}
+
+const validateConstraints = (constraints: BuildConstraints): void => {
+  const {
+    minRooms,
+    maxRooms,
+    minRoomSize,
+    maxRoomSize,
+    maxDeadEnds
+  } = constraints
+
+  const numericChecks: Array<[number | undefined, string, number]> = [
+    [minRooms, 'options.constraints.minRooms', 1],
+    [maxRooms, 'options.constraints.maxRooms', 1],
+    [minRoomSize, 'options.constraints.minRoomSize', 1],
+    [maxRoomSize, 'options.constraints.maxRoomSize', 1],
+    [maxDeadEnds, 'options.constraints.maxDeadEnds', 0]
+  ]
+
+  for (const [value, path, min] of numericChecks) {
+    if (value === undefined) {
+      continue
+    }
+
+    assertInteger(value, path)
+
+    if (value < min) {
+      throw new RangeError(`DungeoneerError: ${path} must be greater than or equal to ${min}, received ${value}`)
+    }
+  }
+
+  if (
+    minRooms !== undefined &&
+    maxRooms !== undefined &&
+    minRooms > maxRooms
+  ) {
+    throw new RangeError('DungeoneerError: options.constraints.minRooms must be less than or equal to options.constraints.maxRooms')
+  }
+
+  if (
+    minRoomSize !== undefined &&
+    maxRoomSize !== undefined &&
+    minRoomSize > maxRoomSize
+  ) {
+    throw new RangeError('DungeoneerError: options.constraints.minRoomSize must be less than or equal to options.constraints.maxRoomSize')
+  }
+}
 
 const Dungeon = function Dungeon () {
   const numRoomTries = 50
@@ -341,6 +402,10 @@ const Dungeon = function Dungeon () {
 
     if (mutableStage.height < 5) {
       throw new RangeError(`DungeoneerError: options.height must not be less than 5, received ${mutableStage.height}`)
+    }
+
+    if (mutableStage.constraints) {
+      validateConstraints(mutableStage.constraints)
     }
 
     if (mutableStage.width % 2 === 0) {
