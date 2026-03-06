@@ -40,7 +40,50 @@
         font-family: monospace;
         text-align: center;
         margin-top: -75px;
-        margin-bottom: 60px;
+        margin-bottom: 20px;
+      }
+
+      #controls {
+        color: white;
+        font-family: monospace;
+        width: min(900px, calc(100vw - 40px));
+        margin: 0 auto 24px;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 8px;
+        padding: 12px;
+      }
+
+      #controls h3 {
+        margin: 6px 0 10px;
+      }
+
+      #controls .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 8px 12px;
+      }
+
+      #controls label {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+      }
+
+      #controls input[type="number"],
+      #controls input[type="text"] {
+        width: 90px;
+      }
+
+      #controls .checkbox {
+        justify-content: flex-start;
+        gap: 6px;
+      }
+
+      #stats {
+        margin-top: 10px;
+        color: #c7ffdb;
       }
 
       @keyframes wiggle {
@@ -68,6 +111,33 @@
     <![endif]-->
     <canvas></canvas>
     <div id="seed"></div>
+
+    <div id="controls">
+      <h3>Demo Controls</h3>
+      <div class="grid">
+        <label>Width <input id="width" type="number" min="5" max="151" step="2" value="51"></label>
+        <label>Height <input id="height" type="number" min="5" max="151" step="2" value="51"></label>
+        <label class="checkbox"><input id="use-seed" type="checkbox">Use seed</label>
+        <label>Seed <input id="seed-input" type="text" placeholder="foobarbaz"></label>
+
+        <label class="checkbox"><input id="show-region-colors" type="checkbox">Color by region tags</label>
+        <label class="checkbox"><input id="plugin-chokes" type="checkbox">Plugin: addChokePoints</label>
+        <label class="checkbox"><input id="plugin-secrets" type="checkbox">Plugin: addSecrets</label>
+        <label class="checkbox"><input id="plugin-regions" type="checkbox">Plugin: addRegionTags</label>
+
+        <label>minRooms <input id="minRooms" type="number" min="1" step="1"></label>
+        <label>maxRooms <input id="maxRooms" type="number" min="1" step="1"></label>
+        <label>minRoomSize <input id="minRoomSize" type="number" min="1" step="1"></label>
+        <label>maxRoomSize <input id="maxRoomSize" type="number" min="1" step="1"></label>
+        <label>maxDeadEnds <input id="maxDeadEnds" type="number" min="0" step="1"></label>
+
+        <label>choke inverseChance <input id="chokeInverse" type="number" min="1" step="1" value="8"></label>
+        <label>choke maxCount <input id="chokeMax" type="number" min="1" step="1" value="12"></label>
+        <label>secrets inverseChance <input id="secretsInverse" type="number" min="1" step="1" value="12"></label>
+        <label>secrets maxCount <input id="secretsMax" type="number" min="1" step="1" value="8"></label>
+      </div>
+      <div id="stats"></div>
+    </div>
 
     <div id="dice-svg">
     <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 496.158 496.158" style="enable-background:new 0 0 496.158 496.158;" xml:space="preserve">
