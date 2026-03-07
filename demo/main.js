@@ -8,6 +8,77 @@ ctx.imageSmoothingEnabled = false
 
 const $seed = document.getElementById('seed')
 const $stats = document.getElementById('stats')
+const $seedHistory = document.getElementById('seed-history')
+const HISTORY_KEY = 'dungeoneer-seed-history-v1'
+const HISTORY_LIMIT = 8
+
+const PRESETS = {
+  classic: {
+    width: 51,
+    height: 51
+  },
+  dense: {
+    width: 51,
+    height: 51,
+    constraints: {
+      minRooms: 24,
+      maxRooms: 38,
+      minRoomSize: 3,
+      maxRoomSize: 7
+    },
+    plugins: {
+      regions: true,
+      chokes: true,
+      chokeInverse: 7,
+      chokeMax: 20
+    }
+  },
+  sparse: {
+    width: 51,
+    height: 51,
+    constraints: {
+      minRooms: 8,
+      maxRooms: 14,
+      minRoomSize: 5,
+      maxRoomSize: 11,
+      maxDeadEnds: 12
+    }
+  },
+  labyrinth: {
+    width: 71,
+    height: 71,
+    constraints: {
+      minRooms: 6,
+      maxRooms: 12,
+      minRoomSize: 3,
+      maxRoomSize: 5,
+      maxDeadEnds: 2
+    },
+    plugins: {
+      chokes: true,
+      chokeInverse: 5,
+      chokeMax: 30
+    }
+  },
+  'secret-heavy': {
+    width: 51,
+    height: 51,
+    constraints: {
+      minRooms: 14,
+      maxRooms: 24,
+      minRoomSize: 3,
+      maxRoomSize: 9
+    },
+    plugins: {
+      secrets: true,
+      secretsInverse: 5,
+      secretsMax: 20,
+      regions: true
+    }
+  }
+}
+
+const parseBool = (value) => value === '1' || value === 'true'
 
 const getNumber = (id) => {
   const raw = document.getElementById(id).value
@@ -21,6 +92,10 @@ const getNumber = (id) => {
   }
 
   return value
+}
+
+const setNumber = (id, value) => {
+  document.getElementById(id).value = value === undefined ? '' : String(value)
 }
 
 const hashColor = (text) => {
@@ -128,6 +203,142 @@ const buildOptionsFromControls = () => {
   return options
 }
 
+const applyUrlState = () => {
+  const params = new URLSearchParams(window.location.search)
+
+  setNumber('width', Number(params.get('w')) || 51)
+  setNumber('height', Number(params.get('h')) || 51)
+
+  const useSeed = parseBool(params.get('us'))
+  document.getElementById('use-seed').checked = useSeed
+  document.getElementById('seed-input').value = params.get('seed') || ''
+
+  document.getElementById('show-region-colors').checked = parseBool(params.get('rc'))
+  document.getElementById('plugin-chokes').checked = parseBool(params.get('pc'))
+  document.getElementById('plugin-secrets').checked = parseBool(params.get('ps'))
+  document.getElementById('plugin-regions').checked = parseBool(params.get('pr'))
+
+  setNumber('minRooms', params.get('minRooms') ? Number(params.get('minRooms')) : undefined)
+  setNumber('maxRooms', params.get('maxRooms') ? Number(params.get('maxRooms')) : undefined)
+  setNumber('minRoomSize', params.get('minRoomSize') ? Number(params.get('minRoomSize')) : undefined)
+  setNumber('maxRoomSize', params.get('maxRoomSize') ? Number(params.get('maxRoomSize')) : undefined)
+  setNumber('maxDeadEnds', params.get('maxDeadEnds') ? Number(params.get('maxDeadEnds')) : undefined)
+
+  setNumber('chokeInverse', params.get('chokeInverse') ? Number(params.get('chokeInverse')) : 8)
+  setNumber('chokeMax', params.get('chokeMax') ? Number(params.get('chokeMax')) : 12)
+  setNumber('secretsInverse', params.get('secretsInverse') ? Number(params.get('secretsInverse')) : 12)
+  setNumber('secretsMax', params.get('secretsMax') ? Number(params.get('secretsMax')) : 8)
+}
+
+const writeUrlState = () => {
+  const params = new URLSearchParams()
+  const options = buildOptionsFromControls()
+
+  params.set('w', String(options.width))
+  params.set('h', String(options.height))
+
+  if (document.getElementById('use-seed').checked) {
+    params.set('us', '1')
+    const seed = document.getElementById('seed-input').value
+    if (seed) {
+      params.set('seed', seed)
+    }
+  }
+
+  if (document.getElementById('show-region-colors').checked) params.set('rc', '1')
+  if (document.getElementById('plugin-chokes').checked) params.set('pc', '1')
+  if (document.getElementById('plugin-secrets').checked) params.set('ps', '1')
+  if (document.getElementById('plugin-regions').checked) params.set('pr', '1')
+
+  for (const key of ['minRooms', 'maxRooms', 'minRoomSize', 'maxRoomSize', 'maxDeadEnds', 'chokeInverse', 'chokeMax', 'secretsInverse', 'secretsMax']) {
+    const value = getNumber(key)
+    if (value !== undefined) {
+      params.set(key, String(value))
+    }
+  }
+
+  const query = params.toString()
+  window.history.replaceState(null, '', `${window.location.pathname}${query ? `?${query}` : ''}`)
+}
+
+const loadSeedHistory = () => {
+  try {
+    const parsed = JSON.parse(window.localStorage.getItem(HISTORY_KEY) || '[]')
+    if (!Array.isArray(parsed)) {
+      return []
+    }
+    return parsed.filter((seed) => typeof seed === 'string').slice(0, HISTORY_LIMIT)
+  } catch (_) {
+    return []
+  }
+}
+
+let seedHistory = loadSeedHistory()
+
+const saveSeedHistory = () => {
+  window.localStorage.setItem(HISTORY_KEY, JSON.stringify(seedHistory))
+}
+
+const renderSeedHistory = () => {
+  $seedHistory.innerHTML = ''
+  if (seedHistory.length === 0) {
+    return
+  }
+
+  const label = document.createElement('span')
+  label.innerText = 'Recent seeds:'
+  $seedHistory.appendChild(label)
+
+  for (const seed of seedHistory) {
+    const button = document.createElement('button')
+    button.type = 'button'
+    button.innerText = seed
+    button.addEventListener('click', () => {
+      document.getElementById('use-seed').checked = true
+      document.getElementById('seed-input').value = seed
+      create()
+    })
+    $seedHistory.appendChild(button)
+  }
+}
+
+const addSeedToHistory = (seed) => {
+  if (!seed) {
+    return
+  }
+
+  seedHistory = [seed, ...seedHistory.filter((item) => item !== seed)].slice(0, HISTORY_LIMIT)
+  saveSeedHistory()
+  renderSeedHistory()
+}
+
+const applyPreset = (name) => {
+  const preset = PRESETS[name]
+  if (!preset) {
+    return
+  }
+
+  setNumber('width', preset.width)
+  setNumber('height', preset.height)
+
+  setNumber('minRooms', preset.constraints ? preset.constraints.minRooms : undefined)
+  setNumber('maxRooms', preset.constraints ? preset.constraints.maxRooms : undefined)
+  setNumber('minRoomSize', preset.constraints ? preset.constraints.minRoomSize : undefined)
+  setNumber('maxRoomSize', preset.constraints ? preset.constraints.maxRoomSize : undefined)
+  setNumber('maxDeadEnds', preset.constraints ? preset.constraints.maxDeadEnds : undefined)
+
+  document.getElementById('plugin-chokes').checked = !!(preset.plugins && preset.plugins.chokes)
+  document.getElementById('plugin-secrets').checked = !!(preset.plugins && preset.plugins.secrets)
+  document.getElementById('plugin-regions').checked = !!(preset.plugins && preset.plugins.regions)
+
+  setNumber('chokeInverse', preset.plugins && preset.plugins.chokeInverse ? preset.plugins.chokeInverse : 8)
+  setNumber('chokeMax', preset.plugins && preset.plugins.chokeMax ? preset.plugins.chokeMax : 12)
+  setNumber('secretsInverse', preset.plugins && preset.plugins.secretsInverse ? preset.plugins.secretsInverse : 12)
+  setNumber('secretsMax', preset.plugins && preset.plugins.secretsMax ? preset.plugins.secretsMax : 8)
+
+  create()
+}
+
 const renderDungeon = (dungeon, width, height) => {
   const cellSize = 4
   const colorByRegion = document.getElementById('show-region-colors').checked
@@ -180,6 +391,9 @@ const create = () => {
 
     $stats.innerText = `rooms=${dungeon.rooms.length} floors=${floors} doors=${doors} deadEnds=${deadEnds}`
 
+    addSeedToHistory(String(dungeon.seed))
+    writeUrlState()
+
     window.ctx = ctx
     window.dungeon = dungeon
   } catch (error) {
@@ -206,6 +420,12 @@ for (const el of document.querySelectorAll('#controls input')) {
   el.addEventListener('change', () => create())
 }
 
+for (const button of document.querySelectorAll('#presets button')) {
+  button.addEventListener('click', () => applyPreset(button.dataset.preset))
+}
+
+applyUrlState()
+renderSeedHistory()
 create()
 
 window.create = create

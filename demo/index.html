@@ -58,6 +58,36 @@
         margin: 6px 0 10px;
       }
 
+      #controls .row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 10px;
+      }
+
+      #controls button {
+        background: rgba(255, 255, 255, 0.15);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.35);
+        border-radius: 6px;
+        padding: 4px 8px;
+        cursor: pointer;
+        font-family: monospace;
+      }
+
+      #controls button:hover {
+        background: rgba(255, 255, 255, 0.25);
+      }
+
+      #seed-history {
+        margin-top: 8px;
+      }
+
+      #seed-history button {
+        font-size: 11px;
+        opacity: 0.9;
+      }
+
       #controls .grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -114,6 +144,13 @@
 
     <div id="controls">
       <h3>Demo Controls</h3>
+      <div id="presets" class="row">
+        <button type="button" data-preset="classic">Classic</button>
+        <button type="button" data-preset="dense">Dense</button>
+        <button type="button" data-preset="sparse">Sparse</button>
+        <button type="button" data-preset="labyrinth">Labyrinth</button>
+        <button type="button" data-preset="secret-heavy">Secret-heavy</button>
+      </div>
       <div class="grid">
         <label>Width <input id="width" type="number" min="5" max="151" step="2" value="51"></label>
         <label>Height <input id="height" type="number" min="5" max="151" step="2" value="51"></label>
@@ -137,6 +174,7 @@
         <label>secrets maxCount <input id="secretsMax" type="number" min="1" step="1" value="8"></label>
       </div>
       <div id="stats"></div>
+      <div id="seed-history" class="row"></div>
     </div>
 
     <div id="dice-svg">
