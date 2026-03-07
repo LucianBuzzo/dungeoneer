@@ -19,7 +19,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "ci": "npm run lint && npm run typecheck && npm run test",
     "dev": "parcel ./demo/index.html",
-    "build:demo": "parcel build --public-url --no-minify ./demo/index.html",
+    "build:demo": "parcel build --public-url ./ ./demo/index.html",
     "prepublishOnly": "npm run build"
   },
   "keywords": [
