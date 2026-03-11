@@ -334,6 +334,34 @@ ava('.build() should throw an error if height is less than 5', (test) => {
   test.is(error.message, `DungeoneerError: options.height must not be less than 5, received ${height}`)
 })
 
+ava('.build() should throw for non-integer width', (test) => {
+  const width = 20.5
+  const height = 21
+
+  const error = test.throws(() => {
+    dungeoneer.build({
+      width,
+      height
+    })
+  })
+
+  test.is(error.message, `DungeoneerError: options.width must be an integer, received ${width}`)
+})
+
+ava('.build() should throw for non-integer height', (test) => {
+  const width = 21
+  const height = 20.5
+
+  const error = test.throws(() => {
+    dungeoneer.build({
+      width,
+      height
+    })
+  })
+
+  test.is(error.message, `DungeoneerError: options.height must be an integer, received ${height}`)
+})
+
 ava('.build() should accept valid constraints without changing invocation shape', (test) => {
   const dungeon = dungeoneer.build({
     width: 21,
