@@ -517,6 +517,9 @@ const Dungeon = function Dungeon () {
   const build = (inputStage: BuildOptions): DungeonOutput => {
     const mutableStage = { ...inputStage }
 
+    assertInteger(mutableStage.width, 'options.width')
+    assertInteger(mutableStage.height, 'options.height')
+
     if (mutableStage.width < 5) {
       throw new RangeError(`DungeoneerError: options.width must not be less than 5, received ${mutableStage.width}`)
     }
